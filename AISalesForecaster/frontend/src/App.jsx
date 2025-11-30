@@ -153,18 +153,11 @@ function App() {
         )}
         
         {step === 'dashboard' && forecastData && (
-          <div className="space-y-6">
-            <Dashboard 
-              forecastData={forecastData} 
-              jobId={uploadData?.job_id}
-            />
-            {insightsData && (
-              <InsightsCard 
-                insights={insightsData} 
-                jobId={uploadData?.job_id}
-              />
-            )}
-          </div>
+          <Dashboard 
+            forecastData={forecastData} 
+            jobId={uploadData?.job_id}
+            insightsData={insightsData}
+          />
         )}
       </main>
     </div>

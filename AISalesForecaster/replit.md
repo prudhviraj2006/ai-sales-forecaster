@@ -57,6 +57,14 @@ The app runs on two servers:
 - `UPLOAD_DIR` - Upload directory (default: backend/uploads)
 
 ## Recent Changes
+- 2025-11-30: Dashboard Layout Reorganization (Final) with:
+  - Header: App title + Model/Horizon/Aggregation controls
+  - Main section: Large forecast chart (left) + KPI cards (right)
+  - KPI cards: Projected Revenue, Growth %, Top Driver, Accuracy
+  - Switchable tabs: Time Series Decomposition vs Feature Importance
+  - Insights feed: Key observations and actionable recommendations
+  - Footer: Export buttons (PDF/CSV)
+  - Responsive grid layout optimized for all screen sizes
 - 2025-11-30: Creative & Professional Dashboard Redesign (V2) with:
   - Premium glassmorphism effects with backdrop blur on all cards
   - Animated metric cards with staggered entrance animations

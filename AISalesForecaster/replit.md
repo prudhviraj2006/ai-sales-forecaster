@@ -57,6 +57,18 @@ The app runs on two servers:
 - `UPLOAD_DIR` - Upload directory (default: backend/uploads)
 
 ## Recent Changes
+- 2025-11-30: Added Comprehensive Forecast Analysis Charts with:
+  - **Page 1 (Overview)**: Main forecast chart with confidence intervals + 4 KPI cards (Revenue, Growth, Top Driver, Accuracy)
+  - **Page 2 (Detailed Analysis)**: Multiple new visualizations:
+    - Residuals chart (forecast errors visualization)
+    - Historical vs Forecast average comparison bar chart
+    - Performance metrics summary (MAE, RMSE, MAPE, Accuracy)
+    - Top Products bar chart
+    - Top Regions pie chart
+  - **Page 3 (Decomposition)**: Time-series decomposition (trend & seasonal) + Feature importance
+  - **Page 4 (Insights)**: AI-generated business insights and recommendations
+  - Expanded from 2 pages to 4 pages for comprehensive analysis
+  - All charts use glassmorphic design with gradient backgrounds
 - 2025-11-30: Redesigned Sidebar with Professional Menu (V2) with:
   - Profile section at top with avatar and app title
   - Menu items: Dashboard, Forecast, Insights, Upload Data, Reports, Settings, Help Center

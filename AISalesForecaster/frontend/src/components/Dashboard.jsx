@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { 
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, 
-  ResponsiveContainer, AreaChart, Area, BarChart, Bar, ComposedChart
+  ResponsiveContainer, AreaChart, Area, BarChart, Bar, ComposedChart, PieChart, Pie, Cell, ScatterChart, Scatter
 } from 'recharts';
 import { TrendingUp, Target, AlertCircle, Download, ChevronDown, ChevronUp, BarChart3, Activity, Sparkles, Settings } from 'lucide-react';
 import { downloadReport } from '../services/api';
@@ -11,7 +11,7 @@ function Dashboard({ forecastData, jobId, insightsData }) {
   const [currentPage, setCurrentPage] = useState(0);
   const { metrics, forecast, historical, decomposition, feature_importance, top_products, top_regions } = forecastData;
 
-  const totalPages = insightsData ? 3 : 2;
+  const totalPages = insightsData ? 4 : 3;
   
   const handleNextPage = () => {
     if (currentPage < totalPages - 1) {
@@ -46,6 +46,33 @@ function Dashboard({ forecastData, jobId, insightsData }) {
     }))
   ];
 
+  // Generate residuals data (historical only)
+  const residualsData = historical.slice(-20).map((h, idx) => {
+    const pred = forecast[idx]?.predicted || h.actual;
+    return {
+      date: h.date,
+      residual: h.actual - pred,
+      actual: h.actual,
+      predicted: pred
+    };
+  });
+
+  // Monthly comparison data
+  const monthlyData = [];
+  const monthMap = {};
+  historical.forEach(h => {
+    const date = new Date(h.date);
+    const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    if (!monthMap[monthKey]) monthMap[monthKey] = { month: monthKey, historical: 0, count: 0 };
+    monthMap[monthKey].historical += h.actual;
+    monthMap[monthKey].count += 1;
+  });
+  const monthlyAvg = Object.values(monthMap).map(m => ({
+    month: m.month,
+    avgHistorical: m.historical / m.count,
+    avgForecast: forecast.length > 0 ? (forecast.reduce((sum, f) => sum + f.predicted, 0) / forecast.length) : 0
+  }));
+
   const handleDownload = async (format) => {
     try {
       await downloadReport(jobId, format);
@@ -61,16 +88,15 @@ function Dashboard({ forecastData, jobId, insightsData }) {
   };
 
   const accuracy = 100 - metrics.mape;
-
-  // Calculate projections
   const totalForecast = forecast.reduce((sum, f) => sum + f.predicted, 0);
   const avgHistorical = historical.reduce((sum, h) => sum + h.actual, 0) / historical.length;
   const growthPercent = ((totalForecast - avgHistorical) / avgHistorical * 100).toFixed(1);
   
-  // Get top driver
   const topDriver = feature_importance && feature_importance.length > 0 
     ? feature_importance[0].feature 
     : 'N/A';
+
+  const COLORS = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#06b6d4', '#6366f1', '#ef4444'];
 
   return (
     <div className="space-y-8 pb-20">
@@ -285,8 +311,138 @@ function Dashboard({ forecastData, jobId, insightsData }) {
       </div>
       )}
 
-      {/* Decomposition / Feature Importance Tabs */}
+      {/* Detailed Analysis Charts */}
       {currentPage === 1 && (
+      <div className="space-y-8">
+        {/* Residuals Analysis */}
+        <div className="group relative">
+          <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+          <div className="relative backdrop-blur-xl bg-gradient-to-br from-white/80 to-gray-50/80 border border-white/50 rounded-3xl p-8 shadow-2xl hover:shadow-3xl transition-all duration-500">
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Forecast Residuals</h2>
+              <p className="text-gray-600 text-sm">Error between actual and predicted values (recent 20 periods)</p>
+            </div>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={residualsData} margin={{ top: 15, right: 30, left: 0, bottom: 10 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+                <XAxis dataKey="date" tick={{ fontSize: 10 }} />
+                <YAxis tick={{ fontSize: 10 }} tickFormatter={formatNumber} />
+                <Tooltip formatter={(value) => formatNumber(value)} />
+                <Bar dataKey="residual" fill="#06b6d4" radius={[8, 8, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Monthly Trends Comparison */}
+        <div className="grid lg:grid-cols-2 gap-8">
+          <div className="group relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+            <div className="relative backdrop-blur-xl bg-gradient-to-br from-white/80 to-gray-50/80 border border-white/50 rounded-3xl p-8 shadow-2xl hover:shadow-3xl transition-all duration-500">
+              <div className="mb-6">
+                <h2 className="text-xl font-bold text-gray-900">Historical vs Forecast Avg</h2>
+              </div>
+              <ResponsiveContainer width="100%" height={250}>
+                <BarChart data={monthlyAvg.slice(-6)}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+                  <XAxis dataKey="month" tick={{ fontSize: 10 }} />
+                  <YAxis tick={{ fontSize: 10 }} tickFormatter={formatNumber} />
+                  <Tooltip formatter={(value) => formatNumber(value)} />
+                  <Legend />
+                  <Bar dataKey="avgHistorical" fill="#3b82f6" name="Historical Avg" radius={[8, 8, 0, 0]} />
+                  <Bar dataKey="avgForecast" fill="#8b5cf6" name="Forecast Avg" radius={[8, 8, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* Metrics Summary */}
+          <div className="group relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-orange-500/20 to-red-500/20 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+            <div className="relative backdrop-blur-xl bg-gradient-to-br from-white/80 to-gray-50/80 border border-white/50 rounded-3xl p-8 shadow-2xl hover:shadow-3xl transition-all duration-500">
+              <div className="mb-6">
+                <h2 className="text-xl font-bold text-gray-900">Performance Metrics</h2>
+              </div>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center p-3 bg-blue-50/50 rounded-lg border border-blue-200/50">
+                  <span className="text-sm font-semibold text-gray-700">MAE</span>
+                  <span className="text-lg font-bold text-blue-600">{metrics.mae?.toFixed(2) || 'N/A'}</span>
+                </div>
+                <div className="flex justify-between items-center p-3 bg-purple-50/50 rounded-lg border border-purple-200/50">
+                  <span className="text-sm font-semibold text-gray-700">RMSE</span>
+                  <span className="text-lg font-bold text-purple-600">{metrics.rmse?.toFixed(2) || 'N/A'}</span>
+                </div>
+                <div className="flex justify-between items-center p-3 bg-pink-50/50 rounded-lg border border-pink-200/50">
+                  <span className="text-sm font-semibold text-gray-700">MAPE</span>
+                  <span className="text-lg font-bold text-pink-600">{metrics.mape?.toFixed(2) || 'N/A'}%</span>
+                </div>
+                <div className="flex justify-between items-center p-3 bg-emerald-50/50 rounded-lg border border-emerald-200/50">
+                  <span className="text-sm font-semibold text-gray-700">Accuracy</span>
+                  <span className="text-lg font-bold text-emerald-600">{accuracy.toFixed(1)}%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Top Products & Regions */}
+        {(top_products || top_regions) && (
+        <div className="grid lg:grid-cols-2 gap-8">
+          {top_products && top_products.length > 0 && (
+          <div className="group relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+            <div className="relative backdrop-blur-xl bg-gradient-to-br from-white/80 to-gray-50/80 border border-white/50 rounded-3xl p-8 shadow-2xl hover:shadow-3xl transition-all duration-500">
+              <div className="mb-6">
+                <h2 className="text-xl font-bold text-gray-900">Top Products</h2>
+              </div>
+              <ResponsiveContainer width="100%" height={250}>
+                <BarChart data={top_products.slice(0, 5)} layout="vertical" margin={{ left: 100, right: 30 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+                  <XAxis type="number" tick={{ fontSize: 10 }} />
+                  <YAxis dataKey="name" type="category" tick={{ fontSize: 10 }} width={90} />
+                  <Tooltip />
+                  <Bar dataKey="value" fill="#10b981" radius={[0, 8, 8, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+          )}
+
+          {top_regions && top_regions.length > 0 && (
+          <div className="group relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+            <div className="relative backdrop-blur-xl bg-gradient-to-br from-white/80 to-gray-50/80 border border-white/50 rounded-3xl p-8 shadow-2xl hover:shadow-3xl transition-all duration-500">
+              <div className="mb-6">
+                <h2 className="text-xl font-bold text-gray-900">Top Regions</h2>
+              </div>
+              <ResponsiveContainer width="100%" height={250}>
+                <PieChart>
+                  <Pie
+                    data={top_regions.slice(0, 5)}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={80}
+                    label
+                  >
+                    {top_regions.slice(0, 5).map((_, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value) => formatNumber(value)} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+          )}
+        </div>
+        )}
+      </div>
+      )}
+
+      {/* Decomposition / Feature Importance Tabs */}
+      {currentPage === 2 && (
       <div className="group relative">
         <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
         <div className="relative backdrop-blur-xl bg-gradient-to-br from-white/80 to-gray-50/80 border border-white/50 rounded-3xl shadow-2xl hover:shadow-3xl transition-all duration-500 overflow-hidden">
@@ -385,7 +541,7 @@ function Dashboard({ forecastData, jobId, insightsData }) {
       )}
 
       {/* Insights Feed */}
-      {currentPage === 2 && insightsData && (
+      {currentPage === 3 && insightsData && (
         <div className="group relative">
           <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
           <div className="relative backdrop-blur-xl bg-gradient-to-br from-white/80 to-gray-50/80 border border-white/50 rounded-3xl p-8 shadow-2xl hover:shadow-3xl transition-all duration-500">
@@ -443,7 +599,6 @@ function Dashboard({ forecastData, jobId, insightsData }) {
         </button>
       </div>
       )}
-
     </div>
   );
 }

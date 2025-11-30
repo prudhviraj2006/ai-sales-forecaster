@@ -1,7 +1,8 @@
 import os
 import pandas as pd
+import numpy as np
 from fastapi import APIRouter, HTTPException
-from typing import Optional
+from typing import Optional, Any
 import logging
 
 from ..models.schemas import (
@@ -15,6 +16,20 @@ from ..services.forecaster import Forecaster
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
+
+
+def clean_nan_inf(obj: Any) -> Any:
+    """Recursively clean NaN and infinity values from nested structures for JSON serialization"""
+    if isinstance(obj, dict):
+        return {k: clean_nan_inf(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [clean_nan_inf(item) for item in obj]
+    elif isinstance(obj, float):
+        if np.isnan(obj) or np.isinf(obj):
+            return 0.0
+        return obj
+    else:
+        return obj
 
 
 @router.post("/forecast", response_model=ForecastResponse)
@@ -90,17 +105,24 @@ async def run_forecast(request: ForecastRequest):
         
         update_job_status(request.job_id, 'completed')
         
+        # Clean NaN/infinity values from response data
+        metrics_dict = clean_nan_inf(results['metrics'].model_dump())
+        forecast_data = clean_nan_inf([f.model_dump() for f in results['forecast']])
+        historical_data = clean_nan_inf([h.model_dump() for h in results['historical']])
+        decomp_data = clean_nan_inf(results['decomposition'].model_dump()) if results['decomposition'] else None
+        feat_imp = clean_nan_inf([fi.model_dump() for fi in results['feature_importance']]) if results['feature_importance'] else None
+        
         return ForecastResponse(
             job_id=request.job_id,
             model_type=request.model.value,
             aggregation=request.aggregation.value,
             horizon=request.horizon,
             target_column=request.target_column,
-            metrics=results['metrics'],
-            forecast=[f.model_dump() for f in results['forecast']],
-            historical=[h.model_dump() for h in results['historical']],
-            decomposition=results['decomposition'],
-            feature_importance=results['feature_importance'],
+            metrics=metrics_dict,
+            forecast=forecast_data,
+            historical=historical_data,
+            decomposition=decomp_data,
+            feature_importance=feat_imp,
             top_products=top_products,
             top_regions=top_regions
         )

@@ -177,6 +177,14 @@ class Forecaster:
             residual=residual_data
         )
     
+    def _clean_nan_inf(self, value: float) -> float:
+        """Clean NaN and infinity values for JSON serialization"""
+        if value is None:
+            return 0.0
+        if np.isnan(value) or np.isinf(value):
+            return 0.0
+        return float(value)
+
     def train_lightgbm(self, horizon: int = 6,
                        aggregation: AggregationType = AggregationType.MONTHLY) -> Dict[str, Any]:
         self.model_type = ModelType.LIGHTGBM
@@ -220,11 +228,16 @@ class Forecaster:
         self.model.fit(X_train, y_train, eval_set=[(X_test, y_test)])
         
         y_pred = self.model.predict(X_test)
+        y_pred = np.array([self._clean_nan_inf(v) for v in y_pred])
         self.metrics = self._calculate_metrics(y_test.values, y_pred)
         
         importances = self.model.feature_importances_
+        importance_sum = float(np.sum(importances)) if np.sum(importances) > 0 else 1.0
         self.feature_importance = [
-            FeatureImportance(feature=feat, importance=round(imp / sum(importances) * 100, 2))
+            FeatureImportance(
+                feature=feat, 
+                importance=round(self._clean_nan_inf(imp) / importance_sum * 100, 2)
+            )
             for feat, imp in sorted(zip(feature_cols, importances), 
                                    key=lambda x: x[1], reverse=True)[:10]
         ]
@@ -238,8 +251,9 @@ class Forecaster:
         for future_date in future_dates:
             future_features = self._create_future_features(last_row, future_date, feature_cols)
             prediction = max(0, self.model.predict([future_features])[0])
+            prediction = self._clean_nan_inf(prediction)
             
-            std_dev = np.std(y) * 0.1
+            std_dev = self._clean_nan_inf(np.std(y) * 0.1)
             forecast_points.append(ForecastPoint(
                 date=future_date.strftime('%Y-%m-%d'),
                 predicted=round(prediction, 2),
@@ -251,9 +265,10 @@ class Forecaster:
         
         historical_points = []
         y_hist_pred = self.model.predict(X)
+        y_hist_pred = np.array([self._clean_nan_inf(v) for v in y_hist_pred])
         
         for idx, (_, row) in enumerate(df.iterrows()):
-            std_dev = np.std(y) * 0.1
+            std_dev = self._clean_nan_inf(np.std(y) * 0.1)
             historical_points.append(ForecastPoint(
                 date=row['date'].strftime('%Y-%m-%d'),
                 actual=round(row[self.target_column], 2),

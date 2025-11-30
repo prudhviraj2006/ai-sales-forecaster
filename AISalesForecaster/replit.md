@@ -57,6 +57,11 @@ The app runs on two servers:
 - `UPLOAD_DIR` - Upload directory (default: backend/uploads)
 
 ## Recent Changes
+- 2025-11-30: Fixed LightGBM JSON Serialization Error with:
+  - Added `_clean_nan_inf()` helper method in Forecaster class
+  - Cleaned all LightGBM predictions, feature importances, and standard deviations
+  - Applied recursive NaN/infinity cleaning to all API responses
+  - LightGBM forecasts now work correctly without serialization errors
 - 2025-11-30: Added Page Navigation with:
   - Previous/Next buttons at bottom center
   - Page indicator dots showing current position

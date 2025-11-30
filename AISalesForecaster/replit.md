@@ -57,6 +57,14 @@ The app runs on two servers:
 - `UPLOAD_DIR` - Upload directory (default: backend/uploads)
 
 ## Recent Changes
+- 2025-11-30: Professional dashboard redesign with:
+  - Enhanced gradient header with model info
+  - Color-coded accuracy metrics (green/yellow/red indicators)
+  - Improved forecast visualization with confidence intervals
+  - Professional card-based layout for KPIs
+  - Better typography and spacing
+  - Refactored feature importance and time-series decomposition
+  - Top products and regions with ranking badges
 - 2025-11-30: Added Recent Sessions feature to view and reload past forecast sessions
 - Initial project setup with full-stack implementation
 - Created backend with FastAPI, Prophet, and LightGBM models

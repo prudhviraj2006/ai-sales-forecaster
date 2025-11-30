@@ -57,6 +57,24 @@ The app runs on two servers:
 - `UPLOAD_DIR` - Upload directory (default: backend/uploads)
 
 ## Recent Changes
+- 2025-11-30: Enhanced PDF & CSV Exports with All Graphs:
+  - **PDF Export** now includes:
+    - Page 1: Forecast Summary + Main Forecast Trend Chart
+    - Page 2: Residuals Chart + Historical vs Forecast Comparison
+    - Page 3: Top Products Bar Chart + Top Regions Pie Chart
+    - Page 4: Decomposition Charts (Trend + Seasonal) + Feature Importance
+    - Page 5: Business Insights & Recommendations
+    - Page 6: Complete Forecast Data Table
+  - **CSV Export** now includes:
+    - Complete forecast summary and metrics
+    - Full historical data with all columns
+    - Full forecast data with confidence intervals
+    - Feature importance rankings
+    - Top products and regions data
+    - Decomposition data (trend + seasonal)
+    - Business insights and recommendations
+  - Uses matplotlib for chart generation in PDF
+  - Professional multi-page report format
 - 2025-11-30: Added Bottom Pagination Controls to Dashboard with:
   - Previous/Next buttons at bottom center of dashboard
   - Page indicator dots showing current page (1/4, 2/4, 3/4, 4/4)

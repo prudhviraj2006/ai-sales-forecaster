@@ -1,0 +1,58 @@
+import axios from 'axios';
+
+const API_BASE_URL = '/api';
+
+const api = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+export const uploadCSV = async (file) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  
+  const response = await api.post('/upload', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+  return response.data;
+};
+
+export const runForecast = async (params) => {
+  const response = await api.post('/forecast', params);
+  return response.data;
+};
+
+export const getForecast = async (jobId) => {
+  const response = await api.get(`/forecast/${jobId}`);
+  return response.data;
+};
+
+export const getInsights = async (jobId) => {
+  const response = await api.get('/insights', {
+    params: { job_id: jobId }
+  });
+  return response.data;
+};
+
+export const downloadReport = async (jobId, format = 'csv') => {
+  const response = await api.get('/download', {
+    params: { job_id: jobId, format },
+    responseType: 'blob',
+  });
+  
+  const blob = new Blob([response.data]);
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `forecast_${jobId}.${format}`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(url);
+};
+
+export default api;

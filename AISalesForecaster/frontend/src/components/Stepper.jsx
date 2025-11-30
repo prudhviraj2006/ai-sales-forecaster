@@ -1,4 +1,4 @@
-import { BarChart3, Zap, Lightbulb, Upload, FileText, Settings, HelpCircle, User, RefreshCw } from 'lucide-react';
+import { BarChart3, Zap, Lightbulb, Upload, FileText, User, RefreshCw } from 'lucide-react';
 
 function Stepper({ currentStep, onStepClick, hasUploadData, hasForecastData, onReset }) {
   const menuItems = [
@@ -7,8 +7,6 @@ function Stepper({ currentStep, onStepClick, hasUploadData, hasForecastData, onR
     { id: 'insights', label: 'Insights', icon: Lightbulb, disabled: !hasForecastData },
     { id: 'upload', label: 'Upload Data', icon: Upload, disabled: false },
     { id: 'reports', label: 'Reports', icon: FileText, disabled: !hasForecastData },
-    { id: 'settings', label: 'Settings', icon: Settings, disabled: false },
-    { id: 'help', label: 'Help Center', icon: HelpCircle, disabled: false },
   ];
 
   const handleMenuClick = (itemId) => {

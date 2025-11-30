@@ -57,6 +57,11 @@ The app runs on two servers:
 - `UPLOAD_DIR` - Upload directory (default: backend/uploads)
 
 ## Recent Changes
+- 2025-11-30: Cleaned Up Left Sidebar Navigation with:
+  - Removed "Settings" menu item
+  - Removed "Help Center" menu item
+  - Sidebar now shows: Dashboard, Forecast, Insights, Upload Data, Reports
+  - Cleaner, focused navigation for project needs
 - 2025-11-30: Moved "Start Over" Button to Left Sidebar with:
   - Removed "Start Over" button from header (top right)
   - Added "Start Over" button to left sidebar above Dashboard menu item

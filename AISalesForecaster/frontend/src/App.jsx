@@ -115,12 +115,13 @@ function App() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <Header onReset={handleReset} currentStep={step} />
+      <Header currentStep={step} />
       <Stepper 
         currentStep={step} 
         onStepClick={handleStepClick}
         hasUploadData={!!uploadData}
         hasForecastData={!!forecastData}
+        onReset={handleReset}
       />
       
       {loading && <LoadingOverlay message={loadingMessage} />}

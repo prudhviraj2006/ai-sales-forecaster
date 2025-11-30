@@ -57,6 +57,12 @@ The app runs on two servers:
 - `UPLOAD_DIR` - Upload directory (default: backend/uploads)
 
 ## Recent Changes
+- 2025-11-30: Moved "Start Over" Button to Left Sidebar with:
+  - Removed "Start Over" button from header (top right)
+  - Added "Start Over" button to left sidebar above Dashboard menu item
+  - Button uses amber/orange gradient for visibility
+  - Only shows when user is past the upload step
+  - Positioned above all menu items with clear separation
 - 2025-11-30: Added Comprehensive Forecast Analysis Charts with:
   - **Page 1 (Overview)**: Main forecast chart with confidence intervals + 4 KPI cards (Revenue, Growth, Top Driver, Accuracy)
   - **Page 2 (Detailed Analysis)**: Multiple new visualizations:

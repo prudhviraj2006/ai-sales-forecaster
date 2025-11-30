@@ -1,6 +1,6 @@
-import { BarChart3, Zap, Lightbulb, Upload, FileText, Settings, HelpCircle, User } from 'lucide-react';
+import { BarChart3, Zap, Lightbulb, Upload, FileText, Settings, HelpCircle, User, RefreshCw } from 'lucide-react';
 
-function Stepper({ currentStep, onStepClick, hasUploadData, hasForecastData }) {
+function Stepper({ currentStep, onStepClick, hasUploadData, hasForecastData, onReset }) {
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: BarChart3, disabled: !hasForecastData },
     { id: 'forecast', label: 'Forecast', icon: Zap, disabled: !hasUploadData },
@@ -46,6 +46,19 @@ function Stepper({ currentStep, onStepClick, hasUploadData, hasForecastData }) {
           </div>
         </div>
       </div>
+
+      {/* Start Over Button */}
+      {currentStep !== 'upload' && (
+        <div className="px-4 py-4 border-b border-slate-700">
+          <button
+            onClick={onReset}
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white rounded-lg transition-all duration-300 font-semibold shadow-lg hover:shadow-xl"
+          >
+            <RefreshCw size={18} />
+            <span>Start Over</span>
+          </button>
+        </div>
+      )}
 
       {/* Menu Items */}
       <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">

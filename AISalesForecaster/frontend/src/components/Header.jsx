@@ -1,6 +1,6 @@
-import { BarChart3, RefreshCw } from 'lucide-react';
+import { BarChart3 } from 'lucide-react';
 
-function Header({ onReset, currentStep }) {
+function Header({ currentStep }) {
   const steps = [
     { id: 'upload', label: 'Upload' },
     { id: 'preview', label: 'Preview' },
@@ -39,16 +39,6 @@ function Header({ onReset, currentStep }) {
               </div>
             ))}
           </div>
-          
-          {currentStep !== 'upload' && (
-            <button
-              onClick={onReset}
-              className="flex items-center gap-2 px-4 py-2 bg-white/20 rounded-lg hover:bg-white/30 transition-colors"
-            >
-              <RefreshCw size={18} />
-              <span className="hidden sm:inline">Start Over</span>
-            </button>
-          )}
         </div>
       </div>
     </header>

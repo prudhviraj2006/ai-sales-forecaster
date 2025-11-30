@@ -57,6 +57,14 @@ The app runs on two servers:
 - `UPLOAD_DIR` - Upload directory (default: backend/uploads)
 
 ## Recent Changes
+- 2025-11-30: Added Bottom Pagination Controls to Dashboard with:
+  - Previous/Next buttons at bottom center of dashboard
+  - Page indicator dots showing current page (1/4, 2/4, 3/4, 4/4)
+  - Click dots to jump to any page
+  - Smooth scroll to top when changing pages
+  - Disabled states for first/last pages
+  - Blue gradient for Previous, Purple gradient for Next
+  - Available on all 4 dashboard pages for easy navigation
 - 2025-11-30: Cleaned Up Left Sidebar Navigation with:
   - Removed "Settings" menu item
   - Removed "Help Center" menu item

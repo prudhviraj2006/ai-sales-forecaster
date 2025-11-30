@@ -57,6 +57,18 @@ The app runs on two servers:
 - `UPLOAD_DIR` - Upload directory (default: backend/uploads)
 
 ## Recent Changes
+- 2025-11-30: Creative & Professional Dashboard Redesign (V2) with:
+  - Premium glassmorphism effects with backdrop blur on all cards
+  - Animated metric cards with staggered entrance animations
+  - Gradient text for headings (modern premium look)
+  - Dynamic hover effects with shadow expansion and glow
+  - Radial gradient background with ambient lighting
+  - Enhanced color schemes with gradient accents on icons
+  - Professional rounded corners (xl to 3xl) throughout
+  - Interactive decomposition chart with smooth transitions
+  - Ranked product/region cards with gradient backgrounds
+  - Custom styled scrollbar and button shine effects
+  - Premium tooltip styling with enhanced shadows
 - 2025-11-30: Professional dashboard redesign with:
   - Enhanced gradient header with model info
   - Color-coded accuracy metrics (green/yellow/red indicators)

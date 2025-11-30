@@ -57,6 +57,14 @@ The app runs on two servers:
 - `UPLOAD_DIR` - Upload directory (default: backend/uploads)
 
 ## Recent Changes
+- 2025-11-30: Added Page Navigation with:
+  - Previous/Next buttons at bottom center
+  - Page indicator dots showing current position
+  - Smooth scrolling between pages
+  - Page 1: Header + Forecast chart + KPI cards
+  - Page 2: Time Series Decomposition / Feature Importance tabs
+  - Page 3: Business Insights feed (observations + recommendations)
+  - Disabled navigation at boundaries (prev/next disabled on first/last page)
 - 2025-11-30: Dashboard Layout Reorganization (Final) with:
   - Header: App title + Model/Horizon/Aggregation controls
   - Main section: Large forecast chart (left) + KPI cards (right)

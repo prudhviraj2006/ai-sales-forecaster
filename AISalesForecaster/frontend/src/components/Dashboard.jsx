@@ -3,12 +3,29 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, 
   ResponsiveContainer, AreaChart, Area, BarChart, Bar, ComposedChart
 } from 'recharts';
-import { TrendingUp, Target, AlertCircle, Download, ChevronDown, ChevronUp, BarChart3, Activity, Sparkles, Settings } from 'lucide-react';
+import { TrendingUp, Target, AlertCircle, Download, ChevronDown, ChevronUp, BarChart3, Activity, Sparkles, Settings, ChevronLeft, ChevronRight } from 'lucide-react';
 import { downloadReport } from '../services/api';
 
 function Dashboard({ forecastData, jobId, insightsData }) {
   const [tabIndex, setTabIndex] = useState(0);
+  const [currentPage, setCurrentPage] = useState(0);
   const { metrics, forecast, historical, decomposition, feature_importance, top_products, top_regions } = forecastData;
+
+  const totalPages = insightsData ? 3 : 2;
+  
+  const handleNextPage = () => {
+    if (currentPage < totalPages - 1) {
+      setCurrentPage(currentPage + 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 0) {
+      setCurrentPage(currentPage - 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
 
   const combinedData = [
     ...historical.map(h => ({
@@ -56,8 +73,9 @@ function Dashboard({ forecastData, jobId, insightsData }) {
     : 'N/A';
 
   return (
-    <div className="space-y-8 pb-12">
+    <div className="space-y-8 pb-20">
       {/* Header with Controls */}
+      {currentPage === 0 && (
       <div className="relative group">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-3xl blur-2xl opacity-30 group-hover:opacity-50 transition-opacity duration-700" />
         <div className="relative bg-gradient-to-br from-blue-600 via-blue-700 to-purple-800 rounded-3xl shadow-2xl p-8 text-white border border-white/20 backdrop-blur-xl overflow-hidden">
@@ -94,8 +112,10 @@ function Dashboard({ forecastData, jobId, insightsData }) {
           </div>
         </div>
       </div>
+      )}
 
       {/* Main Content: Chart + KPIs */}
+      {currentPage === 0 && (
       <div className="grid lg:grid-cols-3 gap-8">
         {/* Left: Large Forecast Chart */}
         <div className="lg:col-span-2">
@@ -263,8 +283,10 @@ function Dashboard({ forecastData, jobId, insightsData }) {
           </div>
         </div>
       </div>
+      )}
 
       {/* Decomposition / Feature Importance Tabs */}
+      {currentPage === 1 && (
       <div className="group relative">
         <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
         <div className="relative backdrop-blur-xl bg-gradient-to-br from-white/80 to-gray-50/80 border border-white/50 rounded-3xl shadow-2xl hover:shadow-3xl transition-all duration-500 overflow-hidden">
@@ -360,9 +382,10 @@ function Dashboard({ forecastData, jobId, insightsData }) {
           </div>
         </div>
       </div>
+      )}
 
       {/* Insights Feed */}
-      {insightsData && (
+      {currentPage === 2 && insightsData && (
         <div className="group relative">
           <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
           <div className="relative backdrop-blur-xl bg-gradient-to-br from-white/80 to-gray-50/80 border border-white/50 rounded-3xl p-8 shadow-2xl hover:shadow-3xl transition-all duration-500">
@@ -402,6 +425,7 @@ function Dashboard({ forecastData, jobId, insightsData }) {
       )}
 
       {/* Footer: Export Buttons */}
+      {currentPage === 0 && (
       <div className="flex justify-center gap-4 pt-8 border-t border-white/20">
         <button
           onClick={() => handleDownload('csv')}
@@ -416,6 +440,53 @@ function Dashboard({ forecastData, jobId, insightsData }) {
         >
           <Download size={20} />
           <span>Export PDF</span>
+        </button>
+      </div>
+      )}
+
+      {/* Pagination Controls */}
+      <div className="flex items-center justify-center gap-6 pt-12 border-t border-white/20">
+        <button
+          onClick={handlePrevPage}
+          disabled={currentPage === 0}
+          className={`flex items-center gap-2 px-8 py-3 rounded-xl font-semibold transition-all duration-300 ${
+            currentPage === 0
+              ? 'bg-white/20 text-gray-400 cursor-not-allowed opacity-50'
+              : 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white hover:from-blue-600 hover:to-cyan-600 hover:scale-105 hover:shadow-lg'
+          }`}
+        >
+          <ChevronLeft size={20} />
+          <span>Previous</span>
+        </button>
+
+        <div className="flex items-center gap-2">
+          {Array.from({ length: totalPages }).map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => {
+                setCurrentPage(idx);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                currentPage === idx
+                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 w-8'
+                  : 'bg-white/40 hover:bg-white/60'
+              }`}
+            />
+          ))}
+        </div>
+
+        <button
+          onClick={handleNextPage}
+          disabled={currentPage === totalPages - 1}
+          className={`flex items-center gap-2 px-8 py-3 rounded-xl font-semibold transition-all duration-300 ${
+            currentPage === totalPages - 1
+              ? 'bg-white/20 text-gray-400 cursor-not-allowed opacity-50'
+              : 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700 hover:scale-105 hover:shadow-lg'
+          }`}
+        >
+          <span>Next</span>
+          <ChevronRight size={20} />
         </button>
       </div>
     </div>

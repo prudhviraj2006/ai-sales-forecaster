@@ -7,6 +7,7 @@ import Dashboard from './components/Dashboard';
 import InsightsCard from './components/InsightsCard';
 import LoadingOverlay from './components/LoadingOverlay';
 import RecentSessions from './components/RecentSessions';
+import Stepper from './components/Stepper';
 import { getJobFullData } from './services/api';
 
 function App() {
@@ -36,6 +37,18 @@ function App() {
     setForecastData(null);
     setInsightsData(null);
     setError(null);
+  };
+
+  const handleStepClick = (stepId) => {
+    if (stepId === 'upload') {
+      setStep('upload');
+    } else if (stepId === 'preview' && uploadData) {
+      setStep('preview');
+    } else if (stepId === 'config' && uploadData) {
+      setStep('config');
+    } else if (stepId === 'dashboard' && forecastData) {
+      setStep('dashboard');
+    }
   };
 
   const handleLoadSession = async (jobId) => {
@@ -103,6 +116,12 @@ function App() {
   return (
     <div className="min-h-screen bg-slate-50">
       <Header onReset={handleReset} currentStep={step} />
+      <Stepper 
+        currentStep={step} 
+        onStepClick={handleStepClick}
+        hasUploadData={!!uploadData}
+        hasForecastData={!!forecastData}
+      />
       
       {loading && <LoadingOverlay message={loadingMessage} />}
       
@@ -114,7 +133,7 @@ function App() {
         </div>
       )}
       
-      <main className="max-w-7xl mx-auto px-4 py-8">
+      <main className="ml-32 max-w-7xl mx-auto px-4 py-8">
         {step === 'upload' && (
           <div className="space-y-8">
             <FileUpload 

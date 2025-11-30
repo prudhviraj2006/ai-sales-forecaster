@@ -57,6 +57,14 @@ The app runs on two servers:
 - `UPLOAD_DIR` - Upload directory (default: backend/uploads)
 
 ## Recent Changes
+- 2025-11-30: Added Vertical Left-Side Navigation with:
+  - Vertical stepper sidebar on left (Upload → Preview → Configure → Dashboard)
+  - Click any step to navigate to that page
+  - Smart disabling: steps disabled until prerequisites are met
+  - Animated step indicators with glow effects
+  - Connection lines between steps for visual flow
+  - Removed bottom pagination buttons in favor of sidebar
+  - Main content auto-adjusts with left margin for sidebar
 - 2025-11-30: Fixed LightGBM JSON Serialization Error with:
   - Added `_clean_nan_inf()` helper method in Forecaster class
   - Cleaned all LightGBM predictions, feature importances, and standard deviations

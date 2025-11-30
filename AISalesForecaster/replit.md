@@ -57,6 +57,16 @@ The app runs on two servers:
 - `UPLOAD_DIR` - Upload directory (default: backend/uploads)
 
 ## Recent Changes
+- 2025-11-30: Redesigned Sidebar with Professional Menu (V2) with:
+  - Profile section at top with avatar and app title
+  - Menu items: Dashboard, Forecast, Insights, Upload Data, Reports, Settings, Help Center
+  - Dark slate background with gradient accents
+  - Active menu item highlighted with blue gradient
+  - Smart disabling based on data availability
+  - Menu icons from Lucide React
+  - App version info in footer
+  - Proper width (256px) for readability
+  - Smooth hover and transition effects
 - 2025-11-30: Added Vertical Left-Side Navigation with:
   - Vertical stepper sidebar on left (Upload → Preview → Configure → Dashboard)
   - Click any step to navigate to that page

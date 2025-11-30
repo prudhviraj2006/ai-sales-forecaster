@@ -133,7 +133,7 @@ function App() {
         </div>
       )}
       
-      <main className="ml-32 max-w-7xl mx-auto px-4 py-8">
+      <main className="ml-64 max-w-7xl mx-auto px-4 py-8">
         {step === 'upload' && (
           <div className="space-y-8">
             <FileUpload 

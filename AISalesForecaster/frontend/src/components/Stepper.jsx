@@ -1,79 +1,88 @@
-import { Upload, Eye, Settings, BarChart3 } from 'lucide-react';
+import { BarChart3, Zap, Lightbulb, Upload, FileText, Settings, HelpCircle, User } from 'lucide-react';
 
 function Stepper({ currentStep, onStepClick, hasUploadData, hasForecastData }) {
-  const steps = [
-    { id: 'upload', label: 'Upload', icon: Upload, disabled: false },
-    { id: 'preview', label: 'Preview', icon: Eye, disabled: !hasUploadData },
-    { id: 'config', label: 'Configure', icon: Settings, disabled: !hasUploadData },
-    { id: 'dashboard', label: 'Dashboard', icon: BarChart3, disabled: !hasForecastData }
+  const menuItems = [
+    { id: 'dashboard', label: 'Dashboard', icon: BarChart3, disabled: !hasForecastData },
+    { id: 'forecast', label: 'Forecast', icon: Zap, disabled: !hasUploadData },
+    { id: 'insights', label: 'Insights', icon: Lightbulb, disabled: !hasForecastData },
+    { id: 'upload', label: 'Upload Data', icon: Upload, disabled: false },
+    { id: 'reports', label: 'Reports', icon: FileText, disabled: !hasForecastData },
+    { id: 'settings', label: 'Settings', icon: Settings, disabled: false },
+    { id: 'help', label: 'Help Center', icon: HelpCircle, disabled: false },
   ];
 
+  const handleMenuClick = (itemId) => {
+    if (itemId === 'upload' || itemId === 'upload-nav') {
+      onStepClick('upload');
+    } else if (itemId === 'forecast') {
+      onStepClick('config');
+    } else if (itemId === 'dashboard') {
+      onStepClick('dashboard');
+    } else if (itemId === 'insights') {
+      onStepClick('dashboard');
+    }
+  };
+
+  const stepMap = {
+    'upload': 'upload',
+    'preview': 'upload',
+    'config': 'forecast',
+    'dashboard': 'dashboard'
+  };
+
+  const currentMenuItem = stepMap[currentStep] || 'upload';
+
   return (
-    <div className="fixed left-0 top-0 h-screen w-32 bg-gradient-to-b from-blue-600 via-blue-700 to-purple-800 border-r border-white/20 backdrop-blur-xl flex flex-col items-center py-8 gap-8 z-40">
-      {steps.map((step, idx) => {
-        const StepIcon = step.icon;
-        const isActive = currentStep === step.id;
-        const isClickable = !step.disabled;
+    <div className="fixed left-0 top-0 h-screen w-64 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 border-r border-slate-700 flex flex-col z-40 shadow-2xl">
+      {/* Profile Section */}
+      <div className="p-6 border-b border-slate-700 bg-gradient-to-r from-blue-600/20 to-purple-600/20">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white shadow-lg">
+            <User size={24} />
+          </div>
+          <div>
+            <p className="text-white font-bold text-sm">AI Forecaster</p>
+            <p className="text-slate-400 text-xs">Sales Analytics</p>
+          </div>
+        </div>
+      </div>
 
-        return (
-          <div key={step.id} className="flex flex-col items-center gap-4">
-            {/* Connection line to next step */}
-            {idx < steps.length - 1 && (
-              <div className="w-1 h-12 bg-gradient-to-b from-white/40 to-white/20 rounded-full" />
-            )}
+      {/* Menu Items */}
+      <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
+        {menuItems.map((item) => {
+          const Icon = item.icon;
+          const isActive = currentMenuItem === (item.id === 'forecast' ? 'forecast' : item.id === 'upload' ? 'upload' : 'dashboard');
+          const isDisabled = item.disabled;
 
-            {/* Step button */}
+          return (
             <button
-              onClick={() => isClickable && onStepClick(step.id)}
-              disabled={step.disabled}
-              className={`group relative flex flex-col items-center gap-2 transition-all duration-300 ${
-                step.disabled ? 'cursor-not-allowed' : 'cursor-pointer'
+              key={item.id}
+              onClick={() => handleMenuClick(item.id)}
+              disabled={isDisabled}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300 group ${
+                isActive
+                  ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg'
+                  : isDisabled
+                  ? 'text-slate-600 cursor-not-allowed opacity-50'
+                  : 'text-slate-300 hover:bg-slate-700/50 hover:text-white'
               }`}
             >
-              {/* Animated background glow */}
-              <div
-                className={`absolute inset-0 rounded-full blur-lg transition-all duration-300 ${
-                  isActive
-                    ? 'bg-white/40 scale-150'
-                    : isClickable
-                    ? 'bg-white/20 scale-100 group-hover:scale-125 group-hover:bg-white/30'
-                    : 'bg-black/20 scale-100'
-                }`}
-              />
-
-              {/* Icon circle */}
-              <div
-                className={`relative w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300 border-2 ${
-                  isActive
-                    ? 'bg-white text-blue-600 border-white shadow-lg scale-110'
-                    : isClickable
-                    ? 'bg-white/20 text-white border-white/40 hover:bg-white/30 hover:border-white/60'
-                    : 'bg-black/20 text-gray-400 border-gray-600'
-                }`}
-              >
-                <StepIcon size={28} />
-              </div>
-
-              {/* Label */}
-              <span
-                className={`text-xs font-bold text-center transition-all duration-300 ${
-                  isActive ? 'text-white scale-110' : 'text-white/70'
-                }`}
-              >
-                {step.label}
-              </span>
+              <Icon size={20} className={`flex-shrink-0 transition-transform ${isActive ? 'scale-110' : ''}`} />
+              <span className="text-sm font-medium">{item.label}</span>
+              {isActive && (
+                <div className="ml-auto w-2 h-2 bg-white rounded-full shadow-lg" />
+              )}
             </button>
+          );
+        })}
+      </nav>
 
-            {/* Connection line to previous step */}
-            {idx > 0 && (
-              <div className="w-1 h-12 bg-gradient-to-t from-white/40 to-white/20 rounded-full" />
-            )}
-          </div>
-        );
-      })}
-
-      {/* Bottom spacing */}
-      <div className="flex-1" />
+      {/* Footer Info */}
+      <div className="p-4 border-t border-slate-700 bg-slate-900/50">
+        <p className="text-xs text-slate-500 text-center">
+          AI Sales Forecaster v1.0
+        </p>
+      </div>
     </div>
   );
 }

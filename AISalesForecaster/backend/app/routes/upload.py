@@ -5,7 +5,7 @@ from typing import List
 import logging
 
 from ..models.schemas import UploadResponse, ValidationResult
-from ..models.database import create_job, get_job
+from ..models.database import create_job, get_job, get_recent_jobs, get_job_with_forecast
 from ..services.data_pipeline import DataPipeline
 from ..utils.helpers import generate_job_id
 
@@ -92,3 +92,17 @@ async def get_job_info(job_id: str):
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
     return job
+
+
+@router.get("/recent-jobs")
+async def get_recent_jobs_list(limit: int = 10):
+    jobs = get_recent_jobs(limit=min(limit, 50))
+    return {"jobs": jobs}
+
+
+@router.get("/job/{job_id}/full")
+async def get_job_full_data(job_id: str):
+    data = get_job_with_forecast(job_id)
+    if not data:
+        raise HTTPException(status_code=404, detail="Job not found")
+    return data

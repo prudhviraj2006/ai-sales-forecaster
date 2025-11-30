@@ -204,3 +204,47 @@ def get_latest_insights(job_id: str) -> Optional[Dict[str, Any]]:
             insights['recommendations'] = json.loads(insights['recommendations']) if insights['recommendations'] else []
             return insights
         return None
+
+
+def get_recent_jobs(limit: int = 10) -> List[Dict[str, Any]]:
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT j.job_id, j.created_at, j.original_filename, j.row_count, 
+                   j.column_count, j.status,
+                   f.model_type, f.aggregation, f.horizon, f.target_column,
+                   f.created_at as forecast_created_at
+            FROM jobs j
+            LEFT JOIN (
+                SELECT job_id, model_type, aggregation, horizon, target_column, created_at,
+                       ROW_NUMBER() OVER (PARTITION BY job_id ORDER BY created_at DESC) as rn
+                FROM forecasts
+            ) f ON j.job_id = f.job_id AND f.rn = 1
+            ORDER BY j.created_at DESC
+            LIMIT ?
+        """, (limit,))
+        
+        rows = cursor.fetchall()
+        result = []
+        
+        for row in rows:
+            job = dict(row)
+            job['has_forecast'] = job.get('model_type') is not None
+            result.append(job)
+        
+        return result
+
+
+def get_job_with_forecast(job_id: str) -> Optional[Dict[str, Any]]:
+    job = get_job(job_id)
+    if not job:
+        return None
+    
+    forecast = get_latest_forecast(job_id)
+    insights = get_latest_insights(job_id)
+    
+    return {
+        'job': job,
+        'forecast': forecast,
+        'insights': insights
+    }

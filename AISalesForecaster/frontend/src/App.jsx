@@ -6,6 +6,8 @@ import ForecastConfig from './components/ForecastConfig';
 import Dashboard from './components/Dashboard';
 import InsightsCard from './components/InsightsCard';
 import LoadingOverlay from './components/LoadingOverlay';
+import RecentSessions from './components/RecentSessions';
+import { getJobFullData } from './services/api';
 
 function App() {
   const [step, setStep] = useState('upload');
@@ -36,6 +38,68 @@ function App() {
     setError(null);
   };
 
+  const handleLoadSession = async (jobId) => {
+    try {
+      setLoading(true);
+      setLoadingMessage('Loading previous session...');
+      setError(null);
+      
+      const data = await getJobFullData(jobId);
+      
+      if (data.forecast) {
+        setUploadData({ job_id: jobId, ...data.job });
+        
+        const parseIfString = (value, fallback) => {
+          if (typeof value === 'string') {
+            try {
+              return JSON.parse(value);
+            } catch {
+              return fallback;
+            }
+          }
+          return value ?? fallback;
+        };
+        
+        const forecastResult = {
+          model_type: data.forecast.model_type,
+          aggregation: data.forecast.aggregation,
+          horizon: data.forecast.horizon,
+          target_column: data.forecast.target_column,
+          metrics: parseIfString(data.forecast.metrics, {}),
+          forecast: parseIfString(data.forecast.forecast_data, []),
+          historical: parseIfString(data.forecast.historical_data, []),
+          decomposition: parseIfString(data.forecast.decomposition_data, null),
+          feature_importance: parseIfString(data.forecast.feature_importance, null),
+          top_products: parseIfString(data.forecast.top_products, null),
+          top_regions: parseIfString(data.forecast.top_regions, null)
+        };
+        
+        setForecastData(forecastResult);
+        
+        if (data.insights) {
+          setInsightsData({
+            title: data.insights.title,
+            summary: data.insights.summary,
+            kpis: parseIfString(data.insights.kpis, []),
+            bullets: parseIfString(data.insights.bullets, []),
+            recommendations: parseIfString(data.insights.recommendations, [])
+          });
+        }
+        
+        setStep('dashboard');
+      } else {
+        setUploadData({ job_id: jobId, ...data.job });
+        setStep('preview');
+      }
+    } catch (err) {
+      console.error('Error loading session:', err);
+      setError('Unable to load the selected session. Please try again.');
+    } finally {
+      setLoading(false);
+      setLoadingMessage('');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-50">
       <Header onReset={handleReset} currentStep={step} />
@@ -52,12 +116,15 @@ function App() {
       
       <main className="max-w-7xl mx-auto px-4 py-8">
         {step === 'upload' && (
-          <FileUpload 
-            onUploadSuccess={handleUploadSuccess}
-            setLoading={setLoading}
-            setLoadingMessage={setLoadingMessage}
-            setError={setError}
-          />
+          <div className="space-y-8">
+            <FileUpload 
+              onUploadSuccess={handleUploadSuccess}
+              setLoading={setLoading}
+              setLoadingMessage={setLoadingMessage}
+              setError={setError}
+            />
+            <RecentSessions onLoadSession={handleLoadSession} />
+          </div>
         )}
         
         {step === 'preview' && uploadData && (

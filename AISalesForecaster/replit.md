@@ -42,18 +42,22 @@ The app runs on two servers:
 - Time-series decomposition (trend, seasonality)
 - Auto-generated business insights with KPIs and recommendations
 - CSV and PDF export functionality
+- Recent Sessions: View and reload previously analyzed forecast sessions
 
 ## API Endpoints
 - `POST /api/upload` - Upload CSV file
 - `POST /api/forecast` - Run forecast with parameters
 - `GET /api/insights?job_id=` - Get generated insights
 - `GET /api/download?job_id=&format=csv|pdf` - Download report
+- `GET /api/recent-jobs?limit=10` - Get recent forecast sessions
+- `GET /api/job/{job_id}/full` - Get full job data with forecast and insights
 
 ## Environment Variables
 - `DATABASE_PATH` - SQLite database path (default: backend/data/forecaster.db)
 - `UPLOAD_DIR` - Upload directory (default: backend/uploads)
 
 ## Recent Changes
+- 2025-11-30: Added Recent Sessions feature to view and reload past forecast sessions
 - Initial project setup with full-stack implementation
 - Created backend with FastAPI, Prophet, and LightGBM models
 - Built React frontend with Recharts visualization

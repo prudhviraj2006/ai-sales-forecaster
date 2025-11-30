@@ -55,4 +55,16 @@ export const downloadReport = async (jobId, format = 'csv') => {
   window.URL.revokeObjectURL(url);
 };
 
+export const getRecentJobs = async (limit = 10) => {
+  const response = await api.get('/recent-jobs', {
+    params: { limit }
+  });
+  return response.data;
+};
+
+export const getJobFullData = async (jobId) => {
+  const response = await api.get(`/job/${jobId}/full`);
+  return response.data;
+};
+
 export default api;

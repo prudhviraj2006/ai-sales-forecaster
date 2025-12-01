@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Header from './components/Header';
 import FileUpload from './components/FileUpload';
 import DataPreview from './components/DataPreview';
@@ -18,6 +18,19 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('');
   const [error, setError] = useState(null);
+  const [darkMode, setDarkMode] = useState(() => {
+    const saved = localStorage.getItem('darkMode');
+    return saved ? JSON.parse(saved) : false;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('darkMode', JSON.stringify(darkMode));
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [darkMode]);
 
   const handleUploadSuccess = (data) => {
     setUploadData(data);
@@ -37,6 +50,15 @@ function App() {
     setForecastData(null);
     setInsightsData(null);
     setError(null);
+  };
+
+  const handleRefreshData = () => {
+    if (uploadData) {
+      setStep('upload');
+      setUploadData(null);
+      setForecastData(null);
+      setInsightsData(null);
+    }
   };
 
   const handleStepClick = (stepId) => {
@@ -114,14 +136,19 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <Header currentStep={step} />
+    <div className={`min-h-screen transition-colors duration-300 ${darkMode ? 'bg-slate-900' : 'bg-slate-50'}`}>
+      <Header 
+        currentStep={step} 
+        darkMode={darkMode} 
+        onToggleDarkMode={() => setDarkMode(!darkMode)} 
+      />
       <Stepper 
         currentStep={step} 
         onStepClick={handleStepClick}
         hasUploadData={!!uploadData}
         hasForecastData={!!forecastData}
         onReset={handleReset}
+        darkMode={darkMode}
       />
       
       {loading && <LoadingOverlay message={loadingMessage} />}
@@ -142,14 +169,19 @@ function App() {
               setLoading={setLoading}
               setLoadingMessage={setLoadingMessage}
               setError={setError}
+              darkMode={darkMode}
             />
-            <RecentSessions onLoadSession={handleLoadSession} />
+            <RecentSessions onLoadSession={handleLoadSession} darkMode={darkMode} />
           </div>
         )}
         
         {step === 'preview' && uploadData && (
           <div className="space-y-6">
-            <DataPreview data={uploadData} />
+            <DataPreview 
+              data={uploadData} 
+              onRefresh={handleRefreshData}
+              darkMode={darkMode}
+            />
             <div className="flex justify-center">
               <button
                 onClick={() => setStep('config')}
@@ -169,6 +201,7 @@ function App() {
             setLoadingMessage={setLoadingMessage}
             setError={setError}
             onBack={() => setStep('preview')}
+            darkMode={darkMode}
           />
         )}
         
@@ -177,6 +210,8 @@ function App() {
             forecastData={forecastData} 
             jobId={uploadData?.job_id}
             insightsData={insightsData}
+            uploadData={uploadData}
+            darkMode={darkMode}
           />
         )}
       </main>

@@ -3,12 +3,15 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, 
   ResponsiveContainer, AreaChart, Area, BarChart, Bar, ComposedChart, PieChart, Pie, Cell, ScatterChart, Scatter
 } from 'recharts';
-import { TrendingUp, Target, AlertCircle, Download, ChevronDown, ChevronUp, BarChart3, Activity, Sparkles, Settings, ChevronLeft, ChevronRight } from 'lucide-react';
+import { TrendingUp, Target, AlertCircle, Download, ChevronDown, ChevronUp, BarChart3, Activity, Sparkles, Settings, ChevronLeft, ChevronRight, GitCompare } from 'lucide-react';
 import { downloadReport } from '../services/api';
+import TooltipInfo from './Tooltip';
+import CompareModelsModal from './CompareModelsModal';
 
-function Dashboard({ forecastData, jobId, insightsData }) {
+function Dashboard({ forecastData, jobId, insightsData, uploadData, darkMode }) {
   const [tabIndex, setTabIndex] = useState(0);
   const [currentPage, setCurrentPage] = useState(0);
+  const [showCompareModal, setShowCompareModal] = useState(false);
   const { metrics, forecast, historical, decomposition, feature_importance, top_products, top_regions } = forecastData;
 
   const totalPages = insightsData ? 4 : 3;
@@ -46,7 +49,6 @@ function Dashboard({ forecastData, jobId, insightsData }) {
     }))
   ];
 
-  // Generate residuals data (historical only)
   const residualsData = historical.slice(-20).map((h, idx) => {
     const pred = forecast[idx]?.predicted || h.actual;
     return {
@@ -57,7 +59,6 @@ function Dashboard({ forecastData, jobId, insightsData }) {
     };
   });
 
-  // Monthly comparison data
   const monthlyData = [];
   const monthMap = {};
   historical.forEach(h => {
@@ -100,7 +101,15 @@ function Dashboard({ forecastData, jobId, insightsData }) {
 
   return (
     <div className="space-y-8 pb-20">
-      {/* Header with Controls */}
+      {showCompareModal && (
+        <CompareModelsModal 
+          isOpen={showCompareModal} 
+          onClose={() => setShowCompareModal(false)}
+          uploadData={uploadData}
+          currentForecast={forecastData}
+        />
+      )}
+
       {currentPage === 0 && (
       <div className="relative group">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-3xl blur-2xl opacity-30 group-hover:opacity-50 transition-opacity duration-700" />
@@ -119,19 +128,29 @@ function Dashboard({ forecastData, jobId, insightsData }) {
               </div>
             </div>
             
-            <div className="flex items-center gap-3 bg-white/10 backdrop-blur-xl rounded-2xl p-4 border border-white/20">
-              <Settings size={20} />
-              <div className="space-y-1">
-                <div className="flex gap-4 text-sm">
-                  <span className="px-3 py-1 bg-white/20 rounded-full font-semibold border border-white/30">
-                    {forecastData.model_type.toUpperCase()}
-                  </span>
-                  <span className="px-3 py-1 bg-white/20 rounded-full font-semibold border border-white/30">
-                    {forecastData.horizon}M
-                  </span>
-                  <span className="px-3 py-1 bg-white/20 rounded-full font-semibold border border-white/30">
-                    {forecastData.aggregation}
-                  </span>
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => setShowCompareModal(true)}
+                className="flex items-center gap-2 px-5 py-3 bg-white/20 hover:bg-white/30 backdrop-blur-xl rounded-xl border border-white/30 font-semibold transition-all duration-300 hover:scale-105"
+              >
+                <GitCompare size={20} />
+                <span>Compare Models</span>
+              </button>
+              
+              <div className="flex items-center gap-3 bg-white/10 backdrop-blur-xl rounded-2xl p-4 border border-white/20">
+                <Settings size={20} />
+                <div className="space-y-1">
+                  <div className="flex gap-4 text-sm">
+                    <span className="px-3 py-1 bg-white/20 rounded-full font-semibold border border-white/30">
+                      {forecastData.model_type.toUpperCase()}
+                    </span>
+                    <span className="px-3 py-1 bg-white/20 rounded-full font-semibold border border-white/30">
+                      {forecastData.horizon}M
+                    </span>
+                    <span className="px-3 py-1 bg-white/20 rounded-full font-semibold border border-white/30">
+                      {forecastData.aggregation}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -140,22 +159,22 @@ function Dashboard({ forecastData, jobId, insightsData }) {
       </div>
       )}
 
-      {/* Main Content: Chart + KPIs */}
       {currentPage === 0 && (
       <div className="grid lg:grid-cols-3 gap-8">
-        {/* Left: Large Forecast Chart */}
         <div className="lg:col-span-2">
           <div className="group relative h-full">
             <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-            <div className="relative backdrop-blur-xl bg-gradient-to-br from-white/80 to-gray-50/80 border border-white/50 rounded-3xl p-8 shadow-2xl hover:shadow-3xl transition-all duration-500 h-full flex flex-col">
+            <div className={`relative backdrop-blur-xl border rounded-3xl p-8 shadow-2xl hover:shadow-3xl transition-all duration-500 h-full flex flex-col ${
+              darkMode ? 'bg-slate-800/80 border-slate-700' : 'bg-gradient-to-br from-white/80 to-gray-50/80 border-white/50'
+            }`}>
               <div className="mb-6">
                 <div className="flex items-center gap-3 mb-2">
                   <div className="w-3 h-8 bg-gradient-to-b from-blue-600 to-purple-600 rounded-full" />
-                  <h2 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                  <h2 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent'}`}>
                     Forecast Trend
                   </h2>
                 </div>
-                <p className="text-gray-600 text-sm ml-6">Historical data vs predictions with confidence intervals</p>
+                <p className={`text-sm ml-6 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Historical data vs predictions with confidence intervals</p>
               </div>
               
               <div className="flex-1 min-h-0">
@@ -167,27 +186,28 @@ function Dashboard({ forecastData, jobId, insightsData }) {
                         <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+                    <CartesianGrid strokeDasharray="3 3" stroke={darkMode ? '#374151' : '#e5e7eb'} vertical={false} />
                     <XAxis 
                       dataKey="date" 
-                      tick={{ fontSize: 11, fill: '#6b7280' }}
+                      tick={{ fontSize: 11, fill: darkMode ? '#9ca3af' : '#6b7280' }}
                       tickFormatter={(value) => {
                         const date = new Date(value);
                         return date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
                       }}
                     />
                     <YAxis 
-                      tick={{ fontSize: 11, fill: '#6b7280' }}
+                      tick={{ fontSize: 11, fill: darkMode ? '#9ca3af' : '#6b7280' }}
                       tickFormatter={formatNumber}
                     />
                     <Tooltip
                       formatter={(value, name) => [formatNumber(value), name]}
                       labelFormatter={(label) => new Date(label).toLocaleDateString()}
                       contentStyle={{
-                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                        border: '1px solid #e5e7eb',
+                        backgroundColor: darkMode ? 'rgba(30, 41, 59, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+                        border: darkMode ? '1px solid #374151' : '1px solid #e5e7eb',
                         borderRadius: '12px',
-                        boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)'
+                        boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)',
+                        color: darkMode ? '#f3f4f6' : '#1f2937'
                       }}
                     />
                     <Legend wrapperStyle={{ paddingTop: '15px' }} />
@@ -201,7 +221,7 @@ function Dashboard({ forecastData, jobId, insightsData }) {
                     <Area
                       dataKey="lower"
                       stroke="none"
-                      fill="#ffffff"
+                      fill={darkMode ? '#1e293b' : '#ffffff'}
                       fillOpacity={1}
                     />
                     <Line
@@ -230,16 +250,16 @@ function Dashboard({ forecastData, jobId, insightsData }) {
           </div>
         </div>
 
-        {/* Right: KPI Cards */}
         <div className="space-y-4">
-          {/* Projected Revenue */}
           <div className="group relative">
             <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-            <div className="relative backdrop-blur-xl bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-200/50 rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105">
+            <div className={`relative backdrop-blur-xl border rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 ${
+              darkMode ? 'bg-emerald-900/30 border-emerald-700/50' : 'bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border-emerald-200/50'
+            }`}>
               <div className="flex items-start justify-between mb-4">
                 <div>
-                  <p className="text-emerald-600/80 text-sm font-semibold tracking-wide uppercase">Projected Revenue</p>
-                  <p className="text-4xl font-bold text-emerald-900 mt-2">
+                  <p className={`text-sm font-semibold tracking-wide uppercase ${darkMode ? 'text-emerald-400' : 'text-emerald-600/80'}`}>Projected Revenue</p>
+                  <p className={`text-4xl font-bold mt-2 ${darkMode ? 'text-emerald-100' : 'text-emerald-900'}`}>
                     ${formatNumber(totalForecast)}
                   </p>
                 </div>
@@ -247,18 +267,19 @@ function Dashboard({ forecastData, jobId, insightsData }) {
                   <TrendingUp size={28} className="text-white" />
                 </div>
               </div>
-              <p className="text-xs text-emerald-600">Forecast total for {forecastData.horizon} months</p>
+              <p className={`text-xs ${darkMode ? 'text-emerald-400' : 'text-emerald-600'}`}>Forecast total for {forecastData.horizon} months</p>
             </div>
           </div>
 
-          {/* Growth Percentage */}
           <div className="group relative">
             <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-            <div className="relative backdrop-blur-xl bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border border-blue-200/50 rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105">
+            <div className={`relative backdrop-blur-xl border rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 ${
+              darkMode ? 'bg-blue-900/30 border-blue-700/50' : 'bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border-blue-200/50'
+            }`}>
               <div className="flex items-start justify-between mb-4">
                 <div>
-                  <p className="text-blue-600/80 text-sm font-semibold tracking-wide uppercase">Growth Rate</p>
-                  <p className={`text-4xl font-bold mt-2 ${growthPercent > 0 ? 'text-blue-900' : 'text-red-900'}`}>
+                  <p className={`text-sm font-semibold tracking-wide uppercase ${darkMode ? 'text-blue-400' : 'text-blue-600/80'}`}>Growth Rate</p>
+                  <p className={`text-4xl font-bold mt-2 ${growthPercent > 0 ? (darkMode ? 'text-blue-100' : 'text-blue-900') : 'text-red-900'}`}>
                     {growthPercent}%
                   </p>
                 </div>
@@ -266,18 +287,19 @@ function Dashboard({ forecastData, jobId, insightsData }) {
                   <Activity size={28} className="text-white" />
                 </div>
               </div>
-              <p className="text-xs text-blue-600">vs. historical average</p>
+              <p className={`text-xs ${darkMode ? 'text-blue-400' : 'text-blue-600'}`}>vs. historical average</p>
             </div>
           </div>
 
-          {/* Top Driver */}
           <div className="group relative">
             <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-            <div className="relative backdrop-blur-xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-200/50 rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105">
+            <div className={`relative backdrop-blur-xl border rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 ${
+              darkMode ? 'bg-purple-900/30 border-purple-700/50' : 'bg-gradient-to-br from-purple-500/10 to-pink-500/10 border-purple-200/50'
+            }`}>
               <div className="flex items-start justify-between mb-4">
                 <div>
-                  <p className="text-purple-600/80 text-sm font-semibold tracking-wide uppercase">Top Driver</p>
-                  <p className="text-2xl font-bold text-purple-900 mt-2 truncate">
+                  <p className={`text-sm font-semibold tracking-wide uppercase ${darkMode ? 'text-purple-400' : 'text-purple-600/80'}`}>Top Driver</p>
+                  <p className={`text-2xl font-bold mt-2 truncate ${darkMode ? 'text-purple-100' : 'text-purple-900'}`}>
                     {topDriver}
                   </p>
                 </div>
@@ -285,18 +307,25 @@ function Dashboard({ forecastData, jobId, insightsData }) {
                   <Target size={28} className="text-white" />
                 </div>
               </div>
-              <p className="text-xs text-purple-600">Primary forecast driver</p>
+              <p className={`text-xs ${darkMode ? 'text-purple-400' : 'text-purple-600'}`}>Primary forecast driver</p>
             </div>
           </div>
 
-          {/* Model Accuracy */}
           <div className="group relative">
             <div className="absolute inset-0 bg-gradient-to-r from-amber-500/20 to-orange-500/20 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-            <div className="relative backdrop-blur-xl bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-200/50 rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105">
+            <div className={`relative backdrop-blur-xl border rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 ${
+              darkMode ? 'bg-amber-900/30 border-amber-700/50' : 'bg-gradient-to-br from-amber-500/10 to-orange-500/10 border-amber-200/50'
+            }`}>
               <div className="flex items-start justify-between mb-4">
                 <div>
-                  <p className="text-amber-600/80 text-sm font-semibold tracking-wide uppercase">Accuracy</p>
-                  <p className={`text-4xl font-bold mt-2 ${accuracy >= 90 ? 'text-green-900' : accuracy >= 80 ? 'text-yellow-900' : 'text-red-900'}`}>
+                  <div className="flex items-center gap-2">
+                    <p className={`text-sm font-semibold tracking-wide uppercase ${darkMode ? 'text-amber-400' : 'text-amber-600/80'}`}>Accuracy</p>
+                    <TooltipInfo 
+                      content="Based on MAPE (Mean Absolute Percentage Error). Higher accuracy means better predictions."
+                      position="left"
+                    />
+                  </div>
+                  <p className={`text-4xl font-bold mt-2 ${accuracy >= 90 ? 'text-green-600' : accuracy >= 80 ? 'text-yellow-600' : 'text-red-600'}`}>
                     {accuracy.toFixed(1)}%
                   </p>
                 </div>
@@ -304,29 +333,29 @@ function Dashboard({ forecastData, jobId, insightsData }) {
                   <AlertCircle size={28} className="text-white" />
                 </div>
               </div>
-              <p className="text-xs text-amber-600">MAPE-based metric</p>
+              <p className={`text-xs ${darkMode ? 'text-amber-400' : 'text-amber-600'}`}>MAPE-based metric</p>
             </div>
           </div>
         </div>
       </div>
       )}
 
-      {/* Detailed Analysis Charts */}
       {currentPage === 1 && (
       <div className="space-y-8">
-        {/* Residuals Analysis */}
         <div className="group relative">
           <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-          <div className="relative backdrop-blur-xl bg-gradient-to-br from-white/80 to-gray-50/80 border border-white/50 rounded-3xl p-8 shadow-2xl hover:shadow-3xl transition-all duration-500">
+          <div className={`relative backdrop-blur-xl border rounded-3xl p-8 shadow-2xl hover:shadow-3xl transition-all duration-500 ${
+            darkMode ? 'bg-slate-800/80 border-slate-700' : 'bg-gradient-to-br from-white/80 to-gray-50/80 border-white/50'
+          }`}>
             <div className="mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Forecast Residuals</h2>
-              <p className="text-gray-600 text-sm">Error between actual and predicted values (recent 20 periods)</p>
+              <h2 className={`text-2xl font-bold mb-2 ${darkMode ? 'text-white' : 'text-gray-900'}`}>Forecast Residuals</h2>
+              <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Error between actual and predicted values (recent 20 periods)</p>
             </div>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={residualsData} margin={{ top: 15, right: 30, left: 0, bottom: 10 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
-                <XAxis dataKey="date" tick={{ fontSize: 10 }} />
-                <YAxis tick={{ fontSize: 10 }} tickFormatter={formatNumber} />
+                <CartesianGrid strokeDasharray="3 3" stroke={darkMode ? '#374151' : '#e5e7eb'} vertical={false} />
+                <XAxis dataKey="date" tick={{ fontSize: 10, fill: darkMode ? '#9ca3af' : '#6b7280' }} />
+                <YAxis tick={{ fontSize: 10, fill: darkMode ? '#9ca3af' : '#6b7280' }} tickFormatter={formatNumber} />
                 <Tooltip formatter={(value) => formatNumber(value)} />
                 <Bar dataKey="residual" fill="#06b6d4" radius={[8, 8, 0, 0]} />
               </BarChart>
@@ -334,19 +363,20 @@ function Dashboard({ forecastData, jobId, insightsData }) {
           </div>
         </div>
 
-        {/* Monthly Trends Comparison */}
         <div className="grid lg:grid-cols-2 gap-8">
           <div className="group relative">
             <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-            <div className="relative backdrop-blur-xl bg-gradient-to-br from-white/80 to-gray-50/80 border border-white/50 rounded-3xl p-8 shadow-2xl hover:shadow-3xl transition-all duration-500">
+            <div className={`relative backdrop-blur-xl border rounded-3xl p-8 shadow-2xl hover:shadow-3xl transition-all duration-500 ${
+              darkMode ? 'bg-slate-800/80 border-slate-700' : 'bg-gradient-to-br from-white/80 to-gray-50/80 border-white/50'
+            }`}>
               <div className="mb-6">
-                <h2 className="text-xl font-bold text-gray-900">Historical vs Forecast Avg</h2>
+                <h2 className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Historical vs Forecast Avg</h2>
               </div>
               <ResponsiveContainer width="100%" height={250}>
                 <BarChart data={monthlyAvg.slice(-6)}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
-                  <XAxis dataKey="month" tick={{ fontSize: 10 }} />
-                  <YAxis tick={{ fontSize: 10 }} tickFormatter={formatNumber} />
+                  <CartesianGrid strokeDasharray="3 3" stroke={darkMode ? '#374151' : '#e5e7eb'} vertical={false} />
+                  <XAxis dataKey="month" tick={{ fontSize: 10, fill: darkMode ? '#9ca3af' : '#6b7280' }} />
+                  <YAxis tick={{ fontSize: 10, fill: darkMode ? '#9ca3af' : '#6b7280' }} tickFormatter={formatNumber} />
                   <Tooltip formatter={(value) => formatNumber(value)} />
                   <Legend />
                   <Bar dataKey="avgHistorical" fill="#3b82f6" name="Historical Avg" radius={[8, 8, 0, 0]} />
@@ -356,28 +386,49 @@ function Dashboard({ forecastData, jobId, insightsData }) {
             </div>
           </div>
 
-          {/* Metrics Summary */}
           <div className="group relative">
             <div className="absolute inset-0 bg-gradient-to-r from-orange-500/20 to-red-500/20 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-            <div className="relative backdrop-blur-xl bg-gradient-to-br from-white/80 to-gray-50/80 border border-white/50 rounded-3xl p-8 shadow-2xl hover:shadow-3xl transition-all duration-500">
+            <div className={`relative backdrop-blur-xl border rounded-3xl p-8 shadow-2xl hover:shadow-3xl transition-all duration-500 ${
+              darkMode ? 'bg-slate-800/80 border-slate-700' : 'bg-gradient-to-br from-white/80 to-gray-50/80 border-white/50'
+            }`}>
               <div className="mb-6">
-                <h2 className="text-xl font-bold text-gray-900">Performance Metrics</h2>
+                <h2 className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Performance Metrics</h2>
               </div>
               <div className="space-y-4">
-                <div className="flex justify-between items-center p-3 bg-blue-50/50 rounded-lg border border-blue-200/50">
-                  <span className="text-sm font-semibold text-gray-700">MAE</span>
+                <div className={`flex justify-between items-center p-3 rounded-lg border ${
+                  darkMode ? 'bg-blue-900/30 border-blue-700/50' : 'bg-blue-50/50 border-blue-200/50'
+                }`}>
+                  <div className="flex items-center gap-2">
+                    <span className={`text-sm font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>MAE</span>
+                    <TooltipInfo content="Mean Absolute Error - Average of absolute differences between predictions and actual values." position="top" />
+                  </div>
                   <span className="text-lg font-bold text-blue-600">{metrics.mae?.toFixed(2) || 'N/A'}</span>
                 </div>
-                <div className="flex justify-between items-center p-3 bg-purple-50/50 rounded-lg border border-purple-200/50">
-                  <span className="text-sm font-semibold text-gray-700">RMSE</span>
+                <div className={`flex justify-between items-center p-3 rounded-lg border ${
+                  darkMode ? 'bg-purple-900/30 border-purple-700/50' : 'bg-purple-50/50 border-purple-200/50'
+                }`}>
+                  <div className="flex items-center gap-2">
+                    <span className={`text-sm font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>RMSE</span>
+                    <TooltipInfo content="Root Mean Square Error - Penalizes larger errors more heavily than MAE." position="top" />
+                  </div>
                   <span className="text-lg font-bold text-purple-600">{metrics.rmse?.toFixed(2) || 'N/A'}</span>
                 </div>
-                <div className="flex justify-between items-center p-3 bg-pink-50/50 rounded-lg border border-pink-200/50">
-                  <span className="text-sm font-semibold text-gray-700">MAPE</span>
+                <div className={`flex justify-between items-center p-3 rounded-lg border ${
+                  darkMode ? 'bg-pink-900/30 border-pink-700/50' : 'bg-pink-50/50 border-pink-200/50'
+                }`}>
+                  <div className="flex items-center gap-2">
+                    <span className={`text-sm font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>MAPE</span>
+                    <TooltipInfo content="Mean Absolute Percentage Error - Error as a percentage of actual values." position="top" />
+                  </div>
                   <span className="text-lg font-bold text-pink-600">{metrics.mape?.toFixed(2) || 'N/A'}%</span>
                 </div>
-                <div className="flex justify-between items-center p-3 bg-emerald-50/50 rounded-lg border border-emerald-200/50">
-                  <span className="text-sm font-semibold text-gray-700">Accuracy</span>
+                <div className={`flex justify-between items-center p-3 rounded-lg border ${
+                  darkMode ? 'bg-emerald-900/30 border-emerald-700/50' : 'bg-emerald-50/50 border-emerald-200/50'
+                }`}>
+                  <div className="flex items-center gap-2">
+                    <span className={`text-sm font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Accuracy</span>
+                    <TooltipInfo content="Model accuracy = 100% - MAPE. Higher is better." position="top" />
+                  </div>
                   <span className="text-lg font-bold text-emerald-600">{accuracy.toFixed(1)}%</span>
                 </div>
               </div>
@@ -385,21 +436,22 @@ function Dashboard({ forecastData, jobId, insightsData }) {
           </div>
         </div>
 
-        {/* Top Products & Regions */}
         {(top_products || top_regions) && (
         <div className="grid lg:grid-cols-2 gap-8">
           {top_products && top_products.length > 0 && (
           <div className="group relative">
             <div className="absolute inset-0 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-            <div className="relative backdrop-blur-xl bg-gradient-to-br from-white/80 to-gray-50/80 border border-white/50 rounded-3xl p-8 shadow-2xl hover:shadow-3xl transition-all duration-500">
+            <div className={`relative backdrop-blur-xl border rounded-3xl p-8 shadow-2xl hover:shadow-3xl transition-all duration-500 ${
+              darkMode ? 'bg-slate-800/80 border-slate-700' : 'bg-gradient-to-br from-white/80 to-gray-50/80 border-white/50'
+            }`}>
               <div className="mb-6">
-                <h2 className="text-xl font-bold text-gray-900">Top Products</h2>
+                <h2 className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Top Products</h2>
               </div>
               <ResponsiveContainer width="100%" height={250}>
                 <BarChart data={top_products.slice(0, 5)} layout="vertical" margin={{ left: 100, right: 30 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
-                  <XAxis type="number" tick={{ fontSize: 10 }} />
-                  <YAxis dataKey="name" type="category" tick={{ fontSize: 10 }} width={90} />
+                  <CartesianGrid strokeDasharray="3 3" stroke={darkMode ? '#374151' : '#e5e7eb'} vertical={false} />
+                  <XAxis type="number" tick={{ fontSize: 10, fill: darkMode ? '#9ca3af' : '#6b7280' }} />
+                  <YAxis dataKey="name" type="category" tick={{ fontSize: 10, fill: darkMode ? '#9ca3af' : '#6b7280' }} width={90} />
                   <Tooltip />
                   <Bar dataKey="value" fill="#10b981" radius={[0, 8, 8, 0]} />
                 </BarChart>
@@ -411,9 +463,11 @@ function Dashboard({ forecastData, jobId, insightsData }) {
           {top_regions && top_regions.length > 0 && (
           <div className="group relative">
             <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-            <div className="relative backdrop-blur-xl bg-gradient-to-br from-white/80 to-gray-50/80 border border-white/50 rounded-3xl p-8 shadow-2xl hover:shadow-3xl transition-all duration-500">
+            <div className={`relative backdrop-blur-xl border rounded-3xl p-8 shadow-2xl hover:shadow-3xl transition-all duration-500 ${
+              darkMode ? 'bg-slate-800/80 border-slate-700' : 'bg-gradient-to-br from-white/80 to-gray-50/80 border-white/50'
+            }`}>
               <div className="mb-6">
-                <h2 className="text-xl font-bold text-gray-900">Top Regions</h2>
+                <h2 className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Top Regions</h2>
               </div>
               <ResponsiveContainer width="100%" height={250}>
                 <PieChart>
@@ -441,20 +495,20 @@ function Dashboard({ forecastData, jobId, insightsData }) {
       </div>
       )}
 
-      {/* Decomposition / Feature Importance Tabs */}
       {currentPage === 2 && (
       <div className="group relative">
         <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-        <div className="relative backdrop-blur-xl bg-gradient-to-br from-white/80 to-gray-50/80 border border-white/50 rounded-3xl shadow-2xl hover:shadow-3xl transition-all duration-500 overflow-hidden">
-          {/* Tab Navigation */}
-          <div className="border-b border-white/30 flex gap-1 p-4 bg-white/20">
+        <div className={`relative backdrop-blur-xl border rounded-3xl shadow-2xl hover:shadow-3xl transition-all duration-500 overflow-hidden ${
+          darkMode ? 'bg-slate-800/80 border-slate-700' : 'bg-gradient-to-br from-white/80 to-gray-50/80 border-white/50'
+        }`}>
+          <div className={`border-b flex gap-1 p-4 ${darkMode ? 'border-slate-700 bg-slate-900/50' : 'border-white/30 bg-white/20'}`}>
             {decomposition && (
               <button
                 onClick={() => setTabIndex(0)}
                 className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
                   tabIndex === 0
                     ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
-                    : 'bg-white/40 text-gray-700 hover:bg-white/60'
+                    : darkMode ? 'bg-slate-700/40 text-gray-300 hover:bg-slate-600/60' : 'bg-white/40 text-gray-700 hover:bg-white/60'
                 }`}
               >
                 <div className="flex items-center gap-2">
@@ -469,7 +523,7 @@ function Dashboard({ forecastData, jobId, insightsData }) {
                 className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
                   tabIndex === 1
                     ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
-                    : 'bg-white/40 text-gray-700 hover:bg-white/60'
+                    : darkMode ? 'bg-slate-700/40 text-gray-300 hover:bg-slate-600/60' : 'bg-white/40 text-gray-700 hover:bg-white/60'
                 }`}
               >
                 <div className="flex items-center gap-2">
@@ -480,30 +534,28 @@ function Dashboard({ forecastData, jobId, insightsData }) {
             )}
           </div>
 
-          {/* Tab Content */}
           <div className="p-8">
-            {/* Time Series Decomposition */}
             {decomposition && tabIndex === 0 && (
               <div className="space-y-8">
                 <div>
-                  <h3 className="text-lg font-bold text-gray-900 mb-4">Trend Component</h3>
+                  <h3 className={`text-lg font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-900'}`}>Trend Component</h3>
                   <ResponsiveContainer width="100%" height={250}>
                     <LineChart data={decomposition.trend}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
-                      <XAxis dataKey="date" tick={{ fontSize: 10 }} />
-                      <YAxis tick={{ fontSize: 10 }} tickFormatter={formatNumber} />
+                      <CartesianGrid strokeDasharray="3 3" stroke={darkMode ? '#374151' : '#e5e7eb'} vertical={false} />
+                      <XAxis dataKey="date" tick={{ fontSize: 10, fill: darkMode ? '#9ca3af' : '#6b7280' }} />
+                      <YAxis tick={{ fontSize: 10, fill: darkMode ? '#9ca3af' : '#6b7280' }} tickFormatter={formatNumber} />
                       <Tooltip formatter={(value) => formatNumber(value)} />
                       <Line type="monotone" dataKey="value" stroke="#1e40af" dot={false} strokeWidth={3} />
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-gray-900 mb-4">Seasonal Component</h3>
+                  <h3 className={`text-lg font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-900'}`}>Seasonal Component</h3>
                   <ResponsiveContainer width="100%" height={250}>
                     <AreaChart data={decomposition.seasonal}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
-                      <XAxis dataKey="date" tick={{ fontSize: 10 }} />
-                      <YAxis tick={{ fontSize: 10 }} tickFormatter={formatNumber} />
+                      <CartesianGrid strokeDasharray="3 3" stroke={darkMode ? '#374151' : '#e5e7eb'} vertical={false} />
+                      <XAxis dataKey="date" tick={{ fontSize: 10, fill: darkMode ? '#9ca3af' : '#6b7280' }} />
+                      <YAxis tick={{ fontSize: 10, fill: darkMode ? '#9ca3af' : '#6b7280' }} tickFormatter={formatNumber} />
                       <Tooltip formatter={(value) => formatNumber(value)} />
                       <Area type="monotone" dataKey="value" stroke="#7c3aed" fill="#c4b5fd" />
                     </AreaChart>
@@ -512,7 +564,6 @@ function Dashboard({ forecastData, jobId, insightsData }) {
               </div>
             )}
 
-            {/* Feature Importance */}
             {feature_importance && feature_importance.length > 0 && tabIndex === 1 && (
               <ResponsiveContainer width="100%" height={400}>
                 <BarChart data={feature_importance} layout="vertical" margin={{ left: 150, right: 30 }}>
@@ -522,12 +573,12 @@ function Dashboard({ forecastData, jobId, insightsData }) {
                       <stop offset="100%" stopColor="#06b6d4" stopOpacity={1}/>
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
-                  <XAxis type="number" tick={{ fontSize: 12 }} />
+                  <CartesianGrid strokeDasharray="3 3" stroke={darkMode ? '#374151' : '#e5e7eb'} vertical={false} />
+                  <XAxis type="number" tick={{ fontSize: 12, fill: darkMode ? '#9ca3af' : '#6b7280' }} />
                   <YAxis 
                     dataKey="feature" 
                     type="category" 
-                    tick={{ fontSize: 11, fill: '#6b7280' }}
+                    tick={{ fontSize: 11, fill: darkMode ? '#9ca3af' : '#6b7280' }}
                     width={140}
                   />
                   <Tooltip formatter={(value) => `${value.toFixed(1)}%`} />
@@ -540,23 +591,26 @@ function Dashboard({ forecastData, jobId, insightsData }) {
       </div>
       )}
 
-      {/* Insights Feed */}
       {currentPage === 3 && insightsData && (
         <div className="group relative">
           <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-          <div className="relative backdrop-blur-xl bg-gradient-to-br from-white/80 to-gray-50/80 border border-white/50 rounded-3xl p-8 shadow-2xl hover:shadow-3xl transition-all duration-500">
-            <h2 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-6">
+          <div className={`relative backdrop-blur-xl border rounded-3xl p-8 shadow-2xl hover:shadow-3xl transition-all duration-500 ${
+            darkMode ? 'bg-slate-800/80 border-slate-700' : 'bg-gradient-to-br from-white/80 to-gray-50/80 border-white/50'
+          }`}>
+            <h2 className={`text-2xl font-bold mb-6 ${darkMode ? 'text-white' : 'bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent'}`}>
               Business Insights
             </h2>
             
             {insightsData.bullets && insightsData.bullets.length > 0 && (
               <div className="mb-8">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Key Observations</h3>
+                <h3 className={`text-lg font-semibold mb-4 ${darkMode ? 'text-gray-200' : 'text-gray-900'}`}>Key Observations</h3>
                 <div className="space-y-3">
                   {insightsData.bullets.map((bullet, idx) => (
-                    <div key={idx} className="flex gap-4 p-4 rounded-2xl bg-blue-50/50 border border-blue-100/50 hover:bg-blue-100/50 transition-colors">
+                    <div key={idx} className={`flex gap-4 p-4 rounded-2xl border transition-colors ${
+                      darkMode ? 'bg-blue-900/20 border-blue-700/30 hover:bg-blue-900/30' : 'bg-blue-50/50 border-blue-100/50 hover:bg-blue-100/50'
+                    }`}>
                       <div className="w-2 h-2 bg-gradient-to-b from-blue-600 to-cyan-600 rounded-full mt-2 flex-shrink-0" />
-                      <p className="text-gray-700 text-sm leading-relaxed">{bullet}</p>
+                      <p className={`text-sm leading-relaxed ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{bullet}</p>
                     </div>
                   ))}
                 </div>
@@ -565,12 +619,14 @@ function Dashboard({ forecastData, jobId, insightsData }) {
 
             {insightsData.recommendations && insightsData.recommendations.length > 0 && (
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Recommendations</h3>
+                <h3 className={`text-lg font-semibold mb-4 ${darkMode ? 'text-gray-200' : 'text-gray-900'}`}>Recommendations</h3>
                 <div className="space-y-3">
                   {insightsData.recommendations.map((rec, idx) => (
-                    <div key={idx} className="flex gap-4 p-4 rounded-2xl bg-emerald-50/50 border border-emerald-100/50 hover:bg-emerald-100/50 transition-colors">
+                    <div key={idx} className={`flex gap-4 p-4 rounded-2xl border transition-colors ${
+                      darkMode ? 'bg-emerald-900/20 border-emerald-700/30 hover:bg-emerald-900/30' : 'bg-emerald-50/50 border-emerald-100/50 hover:bg-emerald-100/50'
+                    }`}>
                       <div className="w-2 h-2 bg-gradient-to-b from-emerald-600 to-teal-600 rounded-full mt-2 flex-shrink-0" />
-                      <p className="text-gray-700 text-sm leading-relaxed">{rec}</p>
+                      <p className={`text-sm leading-relaxed ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{rec}</p>
                     </div>
                   ))}
                 </div>
@@ -580,12 +636,13 @@ function Dashboard({ forecastData, jobId, insightsData }) {
         </div>
       )}
 
-      {/* Footer: Export Buttons */}
       {currentPage === 0 && (
       <div className="flex justify-center gap-4 pt-8 border-t border-white/20 mb-8">
         <button
           onClick={() => handleDownload('csv')}
-          className="group/btn flex items-center gap-3 px-8 py-4 bg-white/40 hover:bg-white/60 border border-white/50 rounded-2xl transition-all duration-300 backdrop-blur-xl font-semibold hover:scale-105 hover:shadow-lg"
+          className={`group/btn flex items-center gap-3 px-8 py-4 border rounded-2xl transition-all duration-300 backdrop-blur-xl font-semibold hover:scale-105 hover:shadow-lg ${
+            darkMode ? 'bg-slate-700/40 hover:bg-slate-600/60 border-slate-600' : 'bg-white/40 hover:bg-white/60 border-white/50'
+          }`}
         >
           <Download size={20} />
           <span>Export CSV</span>
@@ -600,14 +657,13 @@ function Dashboard({ forecastData, jobId, insightsData }) {
       </div>
       )}
 
-      {/* Bottom Pagination Controls */}
-      <div className="flex items-center justify-center gap-8 pt-12 pb-8 border-t border-white/20">
+      <div className={`flex items-center justify-center gap-8 pt-12 pb-8 border-t ${darkMode ? 'border-slate-700' : 'border-white/20'}`}>
         <button
           onClick={handlePrevPage}
           disabled={currentPage === 0}
           className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
             currentPage === 0
-              ? 'bg-white/20 text-gray-400 cursor-not-allowed opacity-50'
+              ? darkMode ? 'bg-slate-700/20 text-gray-500 cursor-not-allowed opacity-50' : 'bg-white/20 text-gray-400 cursor-not-allowed opacity-50'
               : 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white hover:from-blue-600 hover:to-cyan-600 hover:scale-105 hover:shadow-lg'
           }`}
         >
@@ -615,7 +671,6 @@ function Dashboard({ forecastData, jobId, insightsData }) {
           <span>Previous</span>
         </button>
 
-        {/* Page Indicators */}
         <div className="flex items-center gap-3">
           {Array.from({ length: totalPages }).map((_, idx) => (
             <button
@@ -627,7 +682,7 @@ function Dashboard({ forecastData, jobId, insightsData }) {
               className={`w-3 h-3 rounded-full transition-all duration-300 ${
                 currentPage === idx
                   ? 'bg-gradient-to-r from-blue-600 to-purple-600 w-8'
-                  : 'bg-white/40 hover:bg-white/60'
+                  : darkMode ? 'bg-slate-600 hover:bg-slate-500' : 'bg-white/40 hover:bg-white/60'
               }`}
               title={`Go to page ${idx + 1}`}
             />
@@ -639,7 +694,7 @@ function Dashboard({ forecastData, jobId, insightsData }) {
           disabled={currentPage === totalPages - 1}
           className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
             currentPage === totalPages - 1
-              ? 'bg-white/20 text-gray-400 cursor-not-allowed opacity-50'
+              ? darkMode ? 'bg-slate-700/20 text-gray-500 cursor-not-allowed opacity-50' : 'bg-white/20 text-gray-400 cursor-not-allowed opacity-50'
               : 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700 hover:scale-105 hover:shadow-lg'
           }`}
         >

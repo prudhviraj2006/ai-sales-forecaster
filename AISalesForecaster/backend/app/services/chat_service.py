@@ -3,7 +3,7 @@ import json
 import logging
 from typing import List, Dict, Any, Optional
 from datetime import datetime
-import openai
+import google.generativeai as genai
 
 logger = logging.getLogger(__name__)
 
@@ -12,8 +12,11 @@ class ChatService:
     """AI-powered chat service for sales forecasting insights"""
     
     def __init__(self, forecast_data: Dict = None):
-        self.client = openai.OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
-        self.model = "gpt-3.5-turbo"
+        api_key = os.environ.get("GOOGLE_AI_API_KEY")
+        if not api_key:
+            logger.warning("GOOGLE_AI_API_KEY not set")
+        genai.configure(api_key=api_key)
+        self.model = genai.GenerativeModel('gemini-1.5-flash')
         self.forecast_data = forecast_data or {}
         self.conversation_history = []
     
@@ -50,35 +53,29 @@ When answering questions, reference this data and provide specific insights. Be 
             Dictionary with response and metadata
         """
         try:
-            # Prepare messages
-            messages = [
-                {"role": "system", "content": self._build_context()}
-            ]
+            # Build full prompt with context
+            context = self._build_context()
             
-            # Add conversation history
+            # Add conversation history if provided
+            history_text = ""
             if conversation_history:
-                messages.extend(conversation_history[-10:])  # Last 10 messages for context
+                for msg in conversation_history[-10:]:  # Last 10 messages
+                    role = "User" if msg.get("role") == "user" else "Assistant"
+                    history_text += f"{role}: {msg.get('content', '')}\n"
             
-            # Add current message
-            messages.append({"role": "user", "content": user_message})
+            # Combine everything into a single prompt
+            full_prompt = f"{context}\n\nConversation History:\n{history_text}\nUser: {user_message}"
             
-            # Call OpenAI API
-            response = self.client.chat.completions.create(
-                model=self.model,
-                messages=messages,
-                temperature=0.7,
-                max_tokens=500,
-                top_p=0.9
-            )
-            
-            ai_response = response.choices[0].message.content
+            # Call Gemini API
+            response = self.model.generate_content(full_prompt)
+            ai_response = response.text
             
             return {
                 'success': True,
                 'response': ai_response,
                 'timestamp': datetime.now().isoformat(),
-                'model': self.model,
-                'tokens_used': response.usage.total_tokens
+                'model': 'gemini-1.5-flash',
+                'tokens_used': 0
             }
         
         except Exception as e:

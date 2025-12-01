@@ -7,15 +7,38 @@ import { TrendingUp, Target, AlertCircle, Download, ChevronDown, ChevronUp, BarC
 import { downloadReport } from '../services/api';
 import TooltipInfo from './Tooltip';
 import CompareModelsModal from './CompareModelsModal';
+import DashboardFilters from './DashboardFilters';
 
 function Dashboard({ forecastData, jobId, insightsData, uploadData, darkMode }) {
   const [tabIndex, setTabIndex] = useState(0);
   const [currentPage, setCurrentPage] = useState(0);
   const [showCompareModal, setShowCompareModal] = useState(false);
+  const [filters, setFilters] = useState({});
   const { metrics, forecast, historical, decomposition, feature_importance, top_products, top_regions } = forecastData;
 
   const totalPages = insightsData ? 4 : 3;
-  
+
+  // Filter data based on active filters
+  const filterDataByDate = (data, startDate, endDate) => {
+    return data.filter(item => {
+      const itemDate = new Date(item.date);
+      const start = startDate ? new Date(startDate) : null;
+      const end = endDate ? new Date(endDate) : null;
+      
+      if (start && itemDate < start) return false;
+      if (end && itemDate > end) return false;
+      return true;
+    });
+  };
+
+  const filteredHistorical = filters.startDate || filters.endDate 
+    ? filterDataByDate(historical, filters.startDate, filters.endDate)
+    : historical;
+
+  const filteredForecast = filters.startDate || filters.endDate
+    ? filterDataByDate(forecast, filters.startDate, filters.endDate)
+    : forecast;
+
   const handleNextPage = () => {
     if (currentPage < totalPages - 1) {
       setCurrentPage(currentPage + 1);
@@ -31,7 +54,7 @@ function Dashboard({ forecastData, jobId, insightsData, uploadData, darkMode }) 
   };
 
   const combinedData = [
-    ...historical.map(h => ({
+    ...filteredHistorical.map(h => ({
       date: h.date,
       actual: h.actual,
       predicted: null,
@@ -39,7 +62,7 @@ function Dashboard({ forecastData, jobId, insightsData, uploadData, darkMode }) 
       upper: null,
       type: 'historical'
     })),
-    ...forecast.map(f => ({
+    ...filteredForecast.map(f => ({
       date: f.date,
       actual: null,
       predicted: f.predicted,
@@ -49,8 +72,8 @@ function Dashboard({ forecastData, jobId, insightsData, uploadData, darkMode }) 
     }))
   ];
 
-  const residualsData = historical.slice(-20).map((h, idx) => {
-    const pred = forecast[idx]?.predicted || h.actual;
+  const residualsData = filteredHistorical.slice(-20).map((h, idx) => {
+    const pred = filteredForecast[idx]?.predicted || h.actual;
     return {
       date: h.date,
       residual: h.actual - pred,
@@ -61,7 +84,7 @@ function Dashboard({ forecastData, jobId, insightsData, uploadData, darkMode }) 
 
   const monthlyData = [];
   const monthMap = {};
-  historical.forEach(h => {
+  filteredHistorical.forEach(h => {
     const date = new Date(h.date);
     const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
     if (!monthMap[monthKey]) monthMap[monthKey] = { month: monthKey, historical: 0, count: 0 };
@@ -71,7 +94,7 @@ function Dashboard({ forecastData, jobId, insightsData, uploadData, darkMode }) 
   const monthlyAvg = Object.values(monthMap).map(m => ({
     month: m.month,
     avgHistorical: m.historical / m.count,
-    avgForecast: forecast.length > 0 ? (forecast.reduce((sum, f) => sum + f.predicted, 0) / forecast.length) : 0
+    avgForecast: filteredForecast.length > 0 ? (filteredForecast.reduce((sum, f) => sum + f.predicted, 0) / filteredForecast.length) : 0
   }));
 
   const handleDownload = async (format) => {
@@ -89,9 +112,9 @@ function Dashboard({ forecastData, jobId, insightsData, uploadData, darkMode }) 
   };
 
   const accuracy = 100 - metrics.mape;
-  const totalForecast = forecast.reduce((sum, f) => sum + f.predicted, 0);
-  const avgHistorical = historical.reduce((sum, h) => sum + h.actual, 0) / historical.length;
-  const growthPercent = ((totalForecast - avgHistorical) / avgHistorical * 100).toFixed(1);
+  const totalForecast = filteredForecast.reduce((sum, f) => sum + f.predicted, 0);
+  const avgHistorical = filteredHistorical.length > 0 ? filteredHistorical.reduce((sum, h) => sum + h.actual, 0) / filteredHistorical.length : 0;
+  const growthPercent = avgHistorical > 0 ? ((totalForecast - avgHistorical) / avgHistorical * 100).toFixed(1) : 0;
   
   const topDriver = feature_importance && feature_importance.length > 0 
     ? feature_importance[0].feature 
@@ -111,6 +134,15 @@ function Dashboard({ forecastData, jobId, insightsData, uploadData, darkMode }) 
       )}
 
       {currentPage === 0 && (
+      <>
+      <DashboardFilters 
+        onFilterChange={(newFilters) => setFilters(newFilters)}
+        onReset={() => setFilters({})}
+        historical={historical}
+        forecast={forecast}
+        darkMode={darkMode}
+        activeFilters={filters}
+      />
       <div className="relative group">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-3xl blur-2xl opacity-30 group-hover:opacity-50 transition-opacity duration-700" />
         <div className="relative bg-gradient-to-br from-blue-600 via-blue-700 to-purple-800 rounded-3xl shadow-2xl p-8 text-white border border-white/20 backdrop-blur-xl overflow-hidden">
@@ -157,9 +189,7 @@ function Dashboard({ forecastData, jobId, insightsData, uploadData, darkMode }) 
           </div>
         </div>
       </div>
-      )}
 
-      {currentPage === 0 && (
       <div className="grid lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
           <div className="group relative h-full">
@@ -338,6 +368,7 @@ function Dashboard({ forecastData, jobId, insightsData, uploadData, darkMode }) 
           </div>
         </div>
       </div>
+      </>
       )}
 
       {currentPage === 1 && (

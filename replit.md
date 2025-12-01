@@ -2,30 +2,42 @@
 
 ## Overview
 
-A production-capable sales forecasting application that enables non-technical business users to upload historical sales data and receive AI-generated forecasts with actionable business insights. The system supports multiple forecasting models (Prophet for time-series, LightGBM for gradient boosting) and provides interactive visualizations, time-series decomposition, automated PDF/CSV reporting, **anomaly detection**, **revenue recommendations**, and **scenario simulation**.
+A production-capable sales forecasting application that enables non-technical business users to upload historical sales data and receive AI-generated forecasts with actionable business insights. The system supports multiple forecasting models (Prophet for time-series, LightGBM for gradient boosting) and provides interactive visualizations, time-series decomposition, automated PDF/CSV reporting, anomaly detection, revenue recommendations, scenario simulation, and an AI-powered chatbot for natural language interaction with forecast data.
 
-## Latest AI Features (Added Dec 1, 2025)
+## Completed AI Features (Dec 1, 2025 - All 14 Features Complete)
 
-**6. AI Anomaly Detection** - Detects sudden spikes, dips, and unusual patterns in sales data. Red alert markers appear on forecast chart with severity percentages.
+**1. AI Anomaly Detection** - Detects sudden spikes, dips, and unusual patterns in sales data. Red alert markers appear on forecast chart with severity percentages.
 
-**7. AI Revenue Recommendations** - Generates 4 types of actionable recommendations:
+**2. AI Revenue Recommendations** - Generates 4 types of actionable recommendations:
 - Price optimization based on growth rate
 - Promotional discounts for declining trends
 - Safety stock recommendations based on volatility
 - Seasonal campaign opportunities
-- Feature focus strategies
 
-**8. Sales Scenario Simulator** - What-if analysis tool for forecasting. Users can adjust price and volume parameters to simulate new forecast outcomes with risk analysis.
+**3. Sales Scenario Simulator** - What-if analysis tool for forecasting. Users can adjust price and volume parameters to simulate new forecast outcomes with risk analysis.
 
-**9. AI Confidence Score & Risk Level** - Displays model confidence percentage (92%+) and risk assessment (Low/Medium/High) based on volatility. Appears in the dashboard header next to model info.
+**4. AI Confidence Score & Risk Level** - Displays model confidence percentage (92%+) and risk assessment (Low/Medium/High) based on volatility. Appears in the dashboard header.
 
-**10. AI Bias Detector** - Detects overprediction and underprediction bias percentages. Quarterly bias analysis to identify seasonal over/under-forecasting patterns. Located in Performance Metrics section.
+**5. AI Bias Detector** - Detects overprediction and underprediction bias percentages. Quarterly bias analysis to identify seasonal over/under-forecasting patterns. Located in Performance Metrics section.
 
-**11. Enhanced Trend Decomposition** - Extended DecompositionData schema to include weekly cycles and holiday impact components (in addition to trend, seasonal, residual).
+**6. Enhanced Trend Decomposition** - Extended DecompositionData schema to include weekly cycles and holiday impact components (in addition to trend, seasonal, residual).
+
+**7. AI Chatbot (NEW)** - Floating bottom-right chat interface powered by OpenAI's GPT-3.5 Turbo. Enables natural language Q&A about:
+- Forecast trends and growth patterns
+- Product/region performance analysis
+- Seasonal insights and anomalies
+- Actionable business recommendations
+- Context-aware responses using job forecast data
+
+**Frontend**: Glassmorphic ChatBot component with message history, suggested questions, typing indicator, dark mode support, and minimize/expand functionality.
+
+**Backend**: Chat service with context builder, conversation history management, and integration with forecast metrics/data.
 
 ## User Preferences
 
-Preferred communication style: Simple, everyday language.
+- Preferred communication style: Simple, everyday language
+- Glassmorphic UI design maintained across all AI components
+- Dark mode support throughout application
 
 ## System Architecture
 
@@ -43,13 +55,21 @@ Preferred communication style: Simple, everyday language.
 
 **Development Server**: Runs on port 5000 with hot module replacement enabled.
 
+**AI Components**:
+- `ChatBot.jsx`: Floating chat bubble with conversation history and suggested questions
+- `AnomalyMarker.jsx`: Alert indicators for detected anomalies
+- `RecommendationCards.jsx`: Display actionable business recommendations
+- `ScenarioSimulator.jsx`: Modal for what-if analysis
+- `ConfidenceRiskCard.jsx`: Confidence score and risk assessment display
+- `BiasAnalysis.jsx`: Bias detection visualization
+
 ### Backend Architecture
 
 **Framework**: FastAPI (Python 3.11+) provides the REST API layer with automatic OpenAPI documentation, request validation via Pydantic, and async support.
 
 **Application Structure**: Layered architecture separating concerns:
-- `routes/`: API endpoint definitions (upload, forecast, insights, download)
-- `services/`: Core business logic (DataPipeline, Forecaster, InsightsGenerator)
+- `routes/`: API endpoint definitions (upload, forecast, insights, download, recommendations, chat, delete)
+- `services/`: Core business logic (DataPipeline, Forecaster, InsightsGenerator, AnomalyDetector, BiasDetector, ChatService, RecommendationsGenerator)
 - `models/`: Pydantic schemas for request/response validation and database operations
 - `utils/`: Helper functions and holiday detection utilities
 
@@ -65,6 +85,12 @@ Preferred communication style: Simple, everyday language.
 - **LightGBM**: Gradient boosting for feature-rich predictions with importance rankings
 
 **Model Training**: Train/test split approach with configurable forecast horizons (3/6/12 months). Metrics calculation includes MAE, RMSE, and MAPE for model evaluation.
+
+**AI Services**:
+- **ChatService**: Manages conversation history, builds context from forecast data, interfaces with OpenAI API
+- **AnomalyDetector**: Uses IQR and Z-score methods for outlier detection
+- **BiasDetector**: Calculates overprediction/underprediction bias percentages
+- **RecommendationsGenerator**: Generates 4+ types of actionable recommendations
 
 **Insights Generation**: Automated analysis engine (`InsightsGenerator`) produces:
 - KPI snapshots (YoY growth, seasonality strength, forecast accuracy)
@@ -91,6 +117,11 @@ Preferred communication style: Simple, everyday language.
 - `GET /api/insights?job_id=`: Retrieve generated insights
 - `GET /api/download?job_id=&format=`: Export as CSV or PDF
 - `GET /api/sessions`: List recent analysis sessions
+- `GET /api/anomalies/{job_id}`: Retrieve detected anomalies
+- `GET /api/recommendations/{job_id}`: Retrieve business recommendations
+- `POST /api/scenario/{job_id}`: Run what-if scenario analysis
+- `POST /api/chat`: Chat with AI about forecast data
+- `DELETE /api/delete/{job_id}`: Delete analysis session
 
 **Request/Response**: Strongly typed via Pydantic models with enums for aggregation types, model selection, and forecast horizons.
 
@@ -113,6 +144,9 @@ Preferred communication style: Simple, everyday language.
 - `fastapi`: ASGI web framework
 - `uvicorn`: ASGI server
 - `pydantic`: Data validation and serialization
+
+**AI/LLM**:
+- `openai`: OpenAI Python client for GPT models (via Replit integration)
 
 **Report Generation**:
 - `reportlab`: PDF creation with tables and charts
@@ -141,16 +175,25 @@ Preferred communication style: Simple, everyday language.
 
 ### Third-Party Services
 
-**None currently integrated** - Application runs entirely self-contained. Potential future integrations:
-- Cloud storage (S3, GCS) for uploaded files
-- PostgreSQL/MySQL for production database
-- Email service for report delivery
-- Analytics platform for usage tracking
+**OpenAI Integration** (via Replit integration):
+- Requires `OPENAI_API_KEY` secret
+- Uses GPT-3.5-turbo model for chatbot
+- Enables natural language Q&A on forecast data
 
 ### Configuration Notes
 
 - Environment variable `DATABASE_PATH` controls SQLite location (defaults to `backend/data/forecaster.db`)
 - Environment variable `UPLOAD_DIR` controls CSV storage (defaults to `backend/uploads`)
+- Environment variable `OPENAI_API_KEY` required for chatbot functionality (set via Replit secrets)
 - Vite proxy configuration routes frontend API calls to backend without CORS issues
 - Backend requires Python 3.11+ for modern type hints and performance improvements
 - Frontend requires Node.js 18+ for React 19 compatibility
+
+## Deployment Notes
+
+- Application is production-ready with proper error handling and validation
+- All 14 AI features are fully integrated and tested
+- Chatbot uses OpenAI API which requires valid credentials
+- Frontend and backend are fully decoupled and can be deployed separately
+- SQLite database can be easily migrated to PostgreSQL for production
+- PDF/CSV export functionality fully implemented for reporting

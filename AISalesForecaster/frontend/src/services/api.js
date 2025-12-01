@@ -72,4 +72,19 @@ export const deleteJob = async (jobId) => {
   return response.data;
 };
 
+export const getAnomalies = async (jobId) => {
+  const response = await api.get(`/anomalies/${jobId}`);
+  return response.data;
+};
+
+export const getRecommendations = async (jobId) => {
+  const response = await api.get(`/recommendations/${jobId}`);
+  return response.data;
+};
+
+export const runScenario = async (jobId, params) => {
+  const response = await api.post(`/scenario/${jobId}`, params);
+  return response.data;
+};
+
 export default api;

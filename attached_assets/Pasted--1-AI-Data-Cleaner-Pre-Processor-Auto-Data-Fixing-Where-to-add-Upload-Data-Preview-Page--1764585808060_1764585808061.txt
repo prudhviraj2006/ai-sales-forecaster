@@ -1,0 +1,254 @@
+ 1. AI Data Cleaner & Pre-Processor (Auto Data Fixing)
+📍 Where to add: Upload → Data Preview Page
+
+🔥 What AI Does:
+Automatically detects missing values
+
+Smart imputation (KNN / Regression Imputer)
+
+Fills missing date values
+
+Converts incorrect formats (string → number)
+
+Detects outliers (spikes/drops)
+
+🧠 Add AI Badges on UI:
+“AI fixed 128 missing values”
+
+“AI detected 38 anomalies in date column”
+
+📌 Appears right below Data Stats after CSV upload.
+
+🔵 2. AI Feature Engineering Assistant
+📍 Where to add: Configure Forecast Page (Before running Forecast)
+
+🔥 Automatically generates predictive features:
+Seasonality patterns
+
+Holiday/Festival effect
+
+Weather influence (optional)
+
+Price elasticity
+
+Region performance score
+
+Product popularity score
+
+Promotion effect score
+
+🧠 Add UI Badge:
+“AI created 6 new predictive features for better accuracy.”
+
+📌 Appears under Forecast Settings panel.
+
+🔵 3. AI Forecast Model Selector (AutoML)
+📍 Where to add: Configure Your Forecast Page
+
+🔥 AI automatically:
+Compares 10+ models
+
+Chooses best model based on MAPE/RMSE
+
+Explains why it selected that model
+
+📌 Add a Button:
+“AI Pick Best Model For Me”
+
+🧩 Additional Models to Include:
+ARIMA
+
+XGBoost Regressor
+
+Random Forest
+
+LSTM Time Series
+
+CatBoost
+
+NeuralProphet
+
+📌 Appears next to Prophet/LightGBM model selection.
+
+🔵 4. AI Model Explainer (Interpretability Engine)
+📍 Where to add: Insights → Forecast Dashboard
+
+🔥 AI generates:
+SHAP value-based explanation
+
+Feature importance
+
+Key driver analysis
+
+Example insights:
+“Price contributed −13% to forecast.”
+
+“Seasonal trend improved sales by +22%.”
+
+📌 Appears as a “Why This Prediction?” collapsible card.
+
+🔵 5. AI Insight Generator (Natural Language Report)
+📍 Where to add: Insights Page
+
+🔥 AI writes summaries automatically:
+“Sales expected to grow by 12.8% next month.”
+
+“Product A is the top growth driver in East region.”
+
+“Weekends show highest demand spikes.”
+
+📌 Add a Section:
+🧠 AI-Generated Insights
+
+Appears under the main trend chart.
+
+🔵 6. AI Anomaly Detection
+📍 Where to add: Dashboard → Forecast Trend graph
+
+🔥 Detects:
+Sudden spikes
+
+Sharp dips
+
+Incorrect data entries
+
+📌 Add Red Markers:
+🔴 “AI detected anomaly on 2017-10-22 (+300% increase).”
+
+Appears on the actual sales line chart.
+
+🔵 7. AI Revenue Recommendation System
+📍 Where to add: Forecast Dashboard → Right Sidebar
+
+🔥 AI suggests:
+Optimal price change
+
+Discounts/promotions
+
+Best region to target
+
+Low-performing product alerts
+
+Example:
+“Raise price of Product 102 by 4.2% for extra revenue.”
+
+“Offer promo on Product 8 → +19% expected increase.”
+
+📌 Appears as 3–4 recommendation cards.
+
+🔵 8. Sales Scenario Simulator (What-If Generator)
+📍 Where to add: Dashboard → Add a “Scenario Simulator” Button
+
+User can ask:
+“What if price increases 5%?”
+
+“What if region South gets 10% more orders?”
+
+AI returns:
+New forecast curve
+
+New revenue estimate
+
+Risk analysis
+
+📌 Appears as a popup modal.
+
+🔵 9. AI-Based Customer Segmentation (Optional)
+📍 Where to add: Create a new tab → Customer Insights (AI)
+
+Segments using K-Means:
+High-value customers
+
+Repeat buyers
+
+Discount-sensitive
+
+One-time buyers
+
+📌 Show segment distribution pie charts + behavior stats.
+
+🔵 10. Generative AI PDF Report Creator
+📍 Where to add: Export PDF → AI Report Mode
+
+AI includes:
+
+Summary
+
+Forecast
+
+Insights
+
+Charts
+
+Trend analysis
+
+Recommendations
+
+📌 Add Toggle:
+“Enable AI-Generated Report”
+
+🔵 11. AI Confidence Score & Risk Level
+📍 Where to add: Forecast Dashboard
+
+AI calculates:
+
+Confidence interval (Prophet CI95)
+
+Risk level based on volatility
+
+Example:
+
+Confidence: 92%
+
+Risk Level: Low
+
+📌 Place near Projected Revenue box.
+
+🔵 12. AI Enhanced Trend Decomposition
+📍 Where to add: Insights → Time Series Decomposition Page
+
+Enhance existing page with:
+
+Weekly cycle
+
+Holiday impact
+
+Promotion effect
+
+📌 Add 3 mini-graphs below Seasonality.
+
+🔵 13. AI Bias Detector
+📍 Where to add: Insights → Performance Metrics
+
+Detects:
+
+Overprediction
+
+Underprediction
+
+AI Output Example:
+“AI detected −8% underprediction bias in Q3.”
+
+📌 Place below MAPE/RMSE metrics.
+
+🔵 14. AI Sales Chatbot (Optional but Powerful)
+📍 Where to add:
+Bottom-right of dashboard → Chat Bubble
+
+Users can ask:
+
+“Show next 6-month forecast.”
+
+“Which product declining fastest?”
+
+“Explain seasonal trend.”
+
+“Generate insights for West region.”
+
+AI answers with:
+
+Text
+
+Mini charts
+
+Insights

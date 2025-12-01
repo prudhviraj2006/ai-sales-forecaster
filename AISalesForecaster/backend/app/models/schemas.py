@@ -55,6 +55,10 @@ class ForecastMetrics(BaseModel):
     mape: float
     train_size: int
     test_size: int
+    confidence_score: Optional[float] = None
+    risk_level: Optional[str] = None
+    overprediction_bias: Optional[float] = None
+    underprediction_bias: Optional[float] = None
 
 
 class ForecastPoint(BaseModel):
@@ -69,6 +73,8 @@ class DecompositionData(BaseModel):
     trend: List[Dict[str, Any]]
     seasonal: List[Dict[str, Any]]
     residual: List[Dict[str, Any]]
+    weekly: Optional[List[Dict[str, Any]]] = None
+    holiday_impact: Optional[List[Dict[str, Any]]] = None
 
 
 class FeatureImportance(BaseModel):

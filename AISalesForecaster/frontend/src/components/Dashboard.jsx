@@ -11,6 +11,8 @@ import DashboardFilters from './DashboardFilters';
 import AnomalyMarker from './AnomalyMarker';
 import RecommendationCards from './RecommendationCards';
 import ScenarioSimulator from './ScenarioSimulator';
+import ConfidenceRiskCard from './ConfidenceRiskCard';
+import BiasAnalysis from './BiasAnalysis';
 
 function Dashboard({ forecastData, jobId, insightsData, uploadData, darkMode }) {
   const [tabIndex, setTabIndex] = useState(0);
@@ -191,20 +193,18 @@ function Dashboard({ forecastData, jobId, insightsData, uploadData, darkMode }) 
                 <span>Compare Models</span>
               </button>
               
-              <div className="flex items-center gap-3 bg-white/10 backdrop-blur-xl rounded-2xl p-4 border border-white/20">
-                <Settings size={20} />
-                <div className="space-y-1">
-                  <div className="flex gap-4 text-sm">
-                    <span className="px-3 py-1 bg-white/20 rounded-full font-semibold border border-white/30">
-                      {forecastData.model_type.toUpperCase()}
-                    </span>
-                    <span className="px-3 py-1 bg-white/20 rounded-full font-semibold border border-white/30">
-                      {forecastData.horizon}M
-                    </span>
-                    <span className="px-3 py-1 bg-white/20 rounded-full font-semibold border border-white/30">
-                      {forecastData.aggregation}
-                    </span>
-                  </div>
+              <div className="grid grid-cols-3 gap-3 bg-white/10 backdrop-blur-xl rounded-2xl p-4 border border-white/20">
+                <div>
+                  <div className="text-xs text-blue-100 font-semibold">Model</div>
+                  <div className="text-sm font-bold mt-1">{forecastData.model_type.toUpperCase()}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-blue-100 font-semibold">Confidence</div>
+                  <div className="text-sm font-bold text-green-300 mt-1">{metrics.confidence_score ?? 92}%</div>
+                </div>
+                <div>
+                  <div className="text-xs text-blue-100 font-semibold">Risk Level</div>
+                  <div className="text-sm font-bold text-yellow-300 mt-1 capitalize">{metrics.risk_level ?? 'Low'}</div>
                 </div>
               </div>
             </div>

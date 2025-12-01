@@ -14,6 +14,7 @@ from ..models.schemas import (
     ModelType, AggregationType, ForecastMetrics, 
     ForecastPoint, DecompositionData, FeatureImportance
 )
+from .bias_detector import BiasDetector
 
 warnings.filterwarnings('ignore')
 logger = logging.getLogger(__name__)
@@ -28,7 +29,7 @@ class Forecaster:
         self.metrics = None
         self.feature_importance = None
     
-    def _calculate_metrics(self, y_true: np.ndarray, y_pred: np.ndarray) -> ForecastMetrics:
+    def _calculate_metrics(self, y_true: np.ndarray, y_pred: np.ndarray, dates: list = None) -> ForecastMetrics:
         mae = mean_absolute_error(y_true, y_pred)
         rmse = np.sqrt(mean_squared_error(y_true, y_pred))
         
@@ -36,12 +37,19 @@ class Forecaster:
             mape = np.mean(np.abs((y_true - y_pred) / np.where(y_true == 0, 1, y_true))) * 100
             mape = min(mape, 100.0)
         
+        # Calculate bias metrics
+        bias_metrics = BiasDetector.calculate_bias_metrics(y_true, y_pred, dates)
+        
         return ForecastMetrics(
             mae=round(mae, 2),
             rmse=round(rmse, 2),
             mape=round(mape, 2),
             train_size=len(y_true),
-            test_size=len(y_pred)
+            test_size=len(y_pred),
+            confidence_score=bias_metrics.get('confidence_score'),
+            risk_level=bias_metrics.get('risk_level'),
+            overprediction_bias=bias_metrics.get('overprediction_bias'),
+            underprediction_bias=bias_metrics.get('underprediction_bias')
         )
     
     def _get_forecast_periods(self, horizon: int, aggregation: AggregationType, 

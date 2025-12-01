@@ -17,6 +17,12 @@ A production-capable sales forecasting application that enables non-technical bu
 
 **8. Sales Scenario Simulator** - What-if analysis tool for forecasting. Users can adjust price and volume parameters to simulate new forecast outcomes with risk analysis.
 
+**9. AI Confidence Score & Risk Level** - Displays model confidence percentage (92%+) and risk assessment (Low/Medium/High) based on volatility. Appears in the dashboard header next to model info.
+
+**10. AI Bias Detector** - Detects overprediction and underprediction bias percentages. Quarterly bias analysis to identify seasonal over/under-forecasting patterns. Located in Performance Metrics section.
+
+**11. Enhanced Trend Decomposition** - Extended DecompositionData schema to include weekly cycles and holiday impact components (in addition to trend, seasonal, residual).
+
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.

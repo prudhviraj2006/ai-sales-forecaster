@@ -1,10 +1,16 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Upload, FileSpreadsheet, AlertCircle, CheckCircle, RefreshCw } from 'lucide-react';
 import { uploadCSV } from '../services/api';
 
-function FileUpload({ onUploadSuccess, setLoading, setLoadingMessage, setError, darkMode }) {
+function FileUpload({ onUploadSuccess, setLoading, setLoadingMessage, setError, darkMode, refreshCounter }) {
   const [uploadStatus, setUploadStatus] = useState(null);
+
+  useEffect(() => {
+    if (refreshCounter) {
+      setUploadStatus(null);
+    }
+  }, [refreshCounter]);
 
   const onDrop = useCallback(async (acceptedFiles) => {
     const file = acceptedFiles[0];

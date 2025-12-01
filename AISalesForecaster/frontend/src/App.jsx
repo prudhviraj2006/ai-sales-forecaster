@@ -18,6 +18,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('');
   const [error, setError] = useState(null);
+  const [refreshCounter, setRefreshCounter] = useState(0);
   const [darkMode, setDarkMode] = useState(() => {
     const saved = localStorage.getItem('darkMode');
     return saved ? JSON.parse(saved) : false;
@@ -170,6 +171,7 @@ function App() {
               setLoadingMessage={setLoadingMessage}
               setError={setError}
               darkMode={darkMode}
+              refreshCounter={refreshCounter}
             />
             <RecentSessions onLoadSession={handleLoadSession} darkMode={darkMode} />
           </div>

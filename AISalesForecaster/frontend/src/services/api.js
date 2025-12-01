@@ -67,4 +67,9 @@ export const getJobFullData = async (jobId) => {
   return response.data;
 };
 
+export const deleteJob = async (jobId) => {
+  const response = await api.delete(`/job/${jobId}`);
+  return response.data;
+};
+
 export default api;

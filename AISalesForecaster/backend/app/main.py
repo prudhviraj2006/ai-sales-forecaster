@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
 from .models.database import init_database
-from .routes import upload_router, forecast_router, insights_router, download_router
+from .routes import upload_router, forecast_router, insights_router, download_router, delete_router
 
 logging.basicConfig(
     level=logging.INFO,
@@ -42,6 +42,7 @@ app.include_router(upload_router, prefix="/api", tags=["Upload"])
 app.include_router(forecast_router, prefix="/api", tags=["Forecast"])
 app.include_router(insights_router, prefix="/api", tags=["Insights"])
 app.include_router(download_router, prefix="/api", tags=["Download"])
+app.include_router(delete_router, prefix="/api", tags=["Delete"])
 
 
 @app.get("/")

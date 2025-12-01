@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Clock, FileText, TrendingUp, ChevronRight } from 'lucide-react';
-import { getRecentJobs } from '../services/api';
+import { Clock, FileText, TrendingUp, ChevronRight, X } from 'lucide-react';
+import { getRecentJobs, deleteJob } from '../services/api';
 
-function RecentSessions({ onLoadSession }) {
+function RecentSessions({ onLoadSession, darkMode }) {
   const [recentJobs, setRecentJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -21,6 +21,19 @@ function RecentSessions({ onLoadSession }) {
       console.error('Error fetching recent jobs:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteJob = async (e, jobId) => {
+    e.stopPropagation();
+    if (confirm('Are you sure you want to delete this forecast?')) {
+      try {
+        await deleteJob(jobId);
+        setRecentJobs(recentJobs.filter(job => job.job_id !== jobId));
+      } catch (err) {
+        console.error('Error deleting job:', err);
+        alert('Failed to delete forecast');
+      }
     }
   };
 
@@ -48,14 +61,16 @@ function RecentSessions({ onLoadSession }) {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+      <div className={`rounded-xl shadow-sm border p-6 ${
+        darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-100'
+      }`}>
         <div className="flex items-center gap-2 mb-4">
-          <Clock size={20} className="text-gray-500" />
-          <h3 className="text-lg font-semibold text-gray-800">Recent Sessions</h3>
+          <Clock size={20} className={darkMode ? 'text-gray-500' : 'text-gray-500'} />
+          <h3 className={`text-lg font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Recent Sessions</h3>
         </div>
         <div className="animate-pulse space-y-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-16 bg-gray-100 rounded-lg"></div>
+            <div key={i} className={`h-16 rounded-lg ${darkMode ? 'bg-slate-700' : 'bg-gray-100'}`}></div>
           ))}
         </div>
       </div>
@@ -64,12 +79,14 @@ function RecentSessions({ onLoadSession }) {
 
   if (error || recentJobs.length === 0) {
     return (
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+      <div className={`rounded-xl shadow-sm border p-6 ${
+        darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-100'
+      }`}>
         <div className="flex items-center gap-2 mb-4">
-          <Clock size={20} className="text-gray-500" />
-          <h3 className="text-lg font-semibold text-gray-800">Recent Sessions</h3>
+          <Clock size={20} className={darkMode ? 'text-gray-500' : 'text-gray-500'} />
+          <h3 className={`text-lg font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Recent Sessions</h3>
         </div>
-        <p className="text-gray-500 text-sm text-center py-4">
+        <p className={`text-sm text-center py-4 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
           {error || 'No recent sessions found. Upload a file to get started!'}
         </p>
       </div>
@@ -77,20 +94,28 @@ function RecentSessions({ onLoadSession }) {
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+    <div className={`rounded-xl shadow-sm border p-6 ${
+      darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-100'
+    }`}>
       <div className="flex items-center gap-2 mb-4">
-        <Clock size={20} className="text-gray-500" />
-        <h3 className="text-lg font-semibold text-gray-800">Recent Sessions</h3>
+        <Clock size={20} className={darkMode ? 'text-gray-500' : 'text-gray-500'} />
+        <h3 className={`text-lg font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Recent Sessions</h3>
       </div>
       
       <div className="space-y-2">
         {recentJobs.map((job) => (
-          <button
+          <div
             key={job.job_id}
-            onClick={() => onLoadSession(job.job_id)}
-            className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-blue-50 rounded-lg transition-colors text-left group"
+            className={`w-full flex items-center justify-between p-4 rounded-lg transition-colors group cursor-pointer ${
+              darkMode
+                ? 'bg-slate-700/40 hover:bg-slate-600/60'
+                : 'bg-gray-50 hover:bg-blue-50'
+            }`}
           >
-            <div className="flex items-center gap-3 min-w-0">
+            <div 
+              onClick={() => onLoadSession(job.job_id)}
+              className="flex items-center gap-3 min-w-0 flex-1"
+            >
               <div className="flex-shrink-0">
                 {job.has_forecast ? (
                   <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
@@ -104,14 +129,14 @@ function RecentSessions({ onLoadSession }) {
               </div>
               
               <div className="min-w-0">
-                <p className="font-medium text-gray-800 truncate">
+                <p className={`font-medium truncate ${darkMode ? 'text-white' : 'text-gray-800'}`}>
                   {job.original_filename}
                 </p>
-                <div className="flex items-center gap-3 text-sm text-gray-500">
+                <div className={`flex items-center gap-3 text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                   <span>{formatDate(job.created_at)}</span>
                   <span>{job.row_count?.toLocaleString()} rows</span>
                   {job.has_forecast && (
-                    <span className="text-green-600">
+                    <span className="text-green-500">
                       {job.model_type?.toUpperCase()} - {job.horizon}mo
                     </span>
                   )}
@@ -119,11 +144,22 @@ function RecentSessions({ onLoadSession }) {
               </div>
             </div>
             
-            <ChevronRight 
-              size={20} 
-              className="flex-shrink-0 text-gray-400 group-hover:text-blue-600 transition-colors" 
-            />
-          </button>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <ChevronRight 
+                size={20} 
+                className={`transition-colors ${darkMode ? 'text-gray-600 group-hover:text-blue-400' : 'text-gray-400 group-hover:text-blue-600'}`}
+              />
+              <button
+                onClick={(e) => handleDeleteJob(e, job.job_id)}
+                className={`p-1 rounded-lg opacity-0 group-hover:opacity-100 transition-all ${
+                  darkMode ? 'hover:bg-red-900/30 text-red-400' : 'hover:bg-red-100 text-red-600'
+                }`}
+                title="Delete forecast"
+              >
+                <X size={20} />
+              </button>
+            </div>
+          </div>
         ))}
       </div>
     </div>

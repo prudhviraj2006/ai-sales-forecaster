@@ -1,20 +1,42 @@
 import { useState, useEffect } from 'react';
 import { 
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, 
-  ResponsiveContainer, AreaChart, Area, BarChart, Bar, ComposedChart, PieChart, Pie, Cell, ScatterChart, Scatter
+  ResponsiveContainer, AreaChart, Area, BarChart, Bar, ComposedChart, PieChart, Pie, Cell, ScatterChart, Scatter, ReferenceLine
 } from 'recharts';
-import { TrendingUp, Target, AlertCircle, Download, ChevronDown, ChevronUp, BarChart3, Activity, Sparkles, Settings, ChevronLeft, ChevronRight, GitCompare } from 'lucide-react';
-import { downloadReport } from '../services/api';
+import { TrendingUp, Target, AlertCircle, Download, ChevronDown, ChevronUp, BarChart3, Activity, Sparkles, Settings, ChevronLeft, ChevronRight, GitCompare, Zap } from 'lucide-react';
+import { downloadReport, getAnomalies, getRecommendations } from '../services/api';
 import TooltipInfo from './Tooltip';
 import CompareModelsModal from './CompareModelsModal';
 import DashboardFilters from './DashboardFilters';
+import AnomalyMarker from './AnomalyMarker';
+import RecommendationCards from './RecommendationCards';
+import ScenarioSimulator from './ScenarioSimulator';
 
 function Dashboard({ forecastData, jobId, insightsData, uploadData, darkMode }) {
   const [tabIndex, setTabIndex] = useState(0);
   const [currentPage, setCurrentPage] = useState(0);
   const [showCompareModal, setShowCompareModal] = useState(false);
+  const [showScenarioModal, setShowScenarioModal] = useState(false);
   const [filters, setFilters] = useState({});
+  const [anomalies, setAnomalies] = useState([]);
+  const [recommendations, setRecommendations] = useState([]);
   const { metrics, forecast, historical, decomposition, feature_importance, top_products, top_regions } = forecastData;
+
+  useEffect(() => {
+    const loadAIFeatures = async () => {
+      try {
+        const [anomData, recData] = await Promise.all([
+          getAnomalies(jobId),
+          getRecommendations(jobId)
+        ]);
+        setAnomalies(anomData.anomalies || []);
+        setRecommendations(recData.recommendations || []);
+      } catch (err) {
+        console.error('Error loading AI features:', err);
+      }
+    };
+    loadAIFeatures();
+  }, [jobId]);
 
   const totalPages = insightsData ? 4 : 3;
 

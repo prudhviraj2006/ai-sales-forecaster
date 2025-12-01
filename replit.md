@@ -2,7 +2,20 @@
 
 ## Overview
 
-A production-capable sales forecasting application that enables non-technical business users to upload historical sales data and receive AI-generated forecasts with actionable business insights. The system supports multiple forecasting models (Prophet for time-series, LightGBM for gradient boosting) and provides interactive visualizations, time-series decomposition, and automated PDF/CSV reporting.
+A production-capable sales forecasting application that enables non-technical business users to upload historical sales data and receive AI-generated forecasts with actionable business insights. The system supports multiple forecasting models (Prophet for time-series, LightGBM for gradient boosting) and provides interactive visualizations, time-series decomposition, automated PDF/CSV reporting, **anomaly detection**, **revenue recommendations**, and **scenario simulation**.
+
+## Latest AI Features (Added Dec 1, 2025)
+
+**6. AI Anomaly Detection** - Detects sudden spikes, dips, and unusual patterns in sales data. Red alert markers appear on forecast chart with severity percentages.
+
+**7. AI Revenue Recommendations** - Generates 4 types of actionable recommendations:
+- Price optimization based on growth rate
+- Promotional discounts for declining trends
+- Safety stock recommendations based on volatility
+- Seasonal campaign opportunities
+- Feature focus strategies
+
+**8. Sales Scenario Simulator** - What-if analysis tool for forecasting. Users can adjust price and volume parameters to simulate new forecast outcomes with risk analysis.
 
 ## User Preferences
 

@@ -1,0 +1,103 @@
+1. AI Data Cleaner & Pre-Processor (Auto Data Fixing)
+📍 Where to add: Upload → Data Preview Page
+
+🔥 What AI Does:
+Automatically detects missing values
+
+Smart imputation (KNN / Regression Imputer)
+
+Fills missing date values
+
+Converts incorrect formats (string → number)
+
+Detects outliers (spikes/drops)
+
+🧠 Add AI Badges on UI:
+“AI fixed 128 missing values”
+
+“AI detected 38 anomalies in date column”
+
+📌 Appears right below Data Stats after CSV upload.
+
+🔵 2. AI Feature Engineering Assistant
+📍 Where to add: Configure Forecast Page (Before running Forecast)
+
+🔥 Automatically generates predictive features:
+Seasonality patterns
+
+Holiday/Festival effect
+
+Weather influence (optional)
+
+Price elasticity
+
+Region performance score
+
+Product popularity score
+
+Promotion effect score
+
+🧠 Add UI Badge:
+“AI created 6 new predictive features for better accuracy.”
+
+📌 Appears under Forecast Settings panel.
+
+🔵 3. AI Forecast Model Selector (AutoML)
+📍 Where to add: Configure Your Forecast Page
+
+🔥 AI automatically:
+Compares 10+ models
+
+Chooses best model based on MAPE/RMSE
+
+Explains why it selected that model
+
+📌 Add a Button:
+“AI Pick Best Model For Me”
+
+🧩 Additional Models to Include:
+ARIMA
+
+XGBoost Regressor
+
+Random Forest
+
+LSTM Time Series
+
+CatBoost
+
+NeuralProphet
+
+📌 Appears next to Prophet/LightGBM model selection.
+
+🔵 4. AI Model Explainer (Interpretability Engine)
+📍 Where to add: Insights → Forecast Dashboard
+
+🔥 AI generates:
+SHAP value-based explanation
+
+Feature importance
+
+Key driver analysis
+
+Example insights:
+“Price contributed −13% to forecast.”
+
+“Seasonal trend improved sales by +22%.”
+
+📌 Appears as a “Why This Prediction?” collapsible card.
+
+🔵 5. AI Insight Generator (Natural Language Report)
+📍 Where to add: Insights Page
+
+🔥 AI writes summaries automatically:
+“Sales expected to grow by 12.8% next month.”
+
+“Product A is the top growth driver in East region.”
+
+“Weekends show highest demand spikes.”
+
+📌 Add a Section:
+🧠 AI-Generated Insights
+
+Appears under the main trend chart.

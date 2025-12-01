@@ -57,6 +57,18 @@ The app runs on two servers:
 - `UPLOAD_DIR` - Upload directory (default: backend/uploads)
 
 ## Recent Changes
+- 2025-12-01: Added UX Enhancements:
+  - **Dark Mode Toggle**: Moon/Sun icon in header toggles dark/light theme
+  - Theme preference saved to localStorage and persists across sessions
+  - All components support dark mode with appropriate color schemes
+  - **Refresh Data Button**: Added to Upload and Preview pages for quick data reloading
+  - **Reset Button**: Added to Configuration page to reset all settings to defaults
+  - **Compare Models Button**: Added to Dashboard header for side-by-side Prophet vs LightGBM comparison
+  - Compare Models modal shows both model forecasts overlaid with metrics table
+  - **Help Tooltips**: Added contextual help icons next to key fields:
+    - Target Column, Forecast Model, Forecast Horizon on Configuration page
+    - MAE, RMSE, MAPE, Accuracy on Dashboard metrics panel
+  - Created reusable Tooltip component with hover-triggered info popups
 - 2025-11-30: Enhanced PDF & CSV Exports with All Graphs:
   - **PDF Export** now includes:
     - Page 1: Forecast Summary + Main Forecast Trend Chart

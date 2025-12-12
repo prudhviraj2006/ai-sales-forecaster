@@ -1,0 +1,136 @@
+Goal:
+
+Create a production-capable prototype app named "AI Sales Forecaster & Business Insight Generator" that non-technical business users can use to upload historical sales data, get reliable forecasts, and receive automated, actionable business insights.
+
+
+
+1) User stories:
+
+- As a user I can upload a CSV of historical sales and preview the cleaned dataset.
+
+- I can choose forecast horizon (3/6/12 months), aggregation (daily/weekly/monthly), and model type (Prophet or LightGBM).
+
+- I can view time-series charts, decomposition, top product/region forecasts, and export results.
+
+- I can read an auto-generated summary with KPI snapshots (YoY growth, seasonality, forecast accuracy) and 3 tactical recommendations.
+
+- I can download CSV or PDF report.
+
+
+
+2) Input CSV spec (example columns):
+
+- date (YYYY-MM-DD)
+
+- product_id
+
+- product_name
+
+- region
+
+- units_sold (int)
+
+- revenue (float)
+
+- price (float)
+
+- promotion_flag (0/1 optional)
+
+
+
+3) Backend:
+
+- FastAPI service (Python 3.10+).
+
+- Endpoints:
+
+  POST /upload -> accept CSV, store raw, return preview and validation results
+
+  POST /forecast -> body {aggregation, model, horizon, target_column, group_by(optional)} -> returns forecast series + metrics
+
+  GET /insights?job_id= -> returns generated natural-language insights (JSON: title, summary, bullets, recommendations)
+
+  GET /download?job_id=&format=csv|pdf -> returns file
+
+- Data pipeline:
+
+  - Validation (schema, date parse, missing values)
+
+  - Aggregation (group by chosen freq)
+
+  - Feature engineering: lag features, rolling means, promotion flags, price elasticity proxies, holiday flags (use pandas and workalendar or a simple holiday list)
+
+  - Outlier handling: IQR winsorization and interpolation
+
+- Modeling:
+
+  - Prophet option: time-series decomposition, uncertainty intervals
+
+  - LightGBM option: supervised regression with lag & covariates for multivariate forecasting
+
+  - Train/validate split, calculate MAE, RMSE, MAPE. Return metrics.
+
+- Insights generator:
+
+  - Rule-based + templated natural language using metric thresholds (e.g., if seasonality strong -> "Sales show strong seasonal peaks in X months")
+
+  - Extract top drivers with feature importance (for LightGBM)
+
+  - Provide 3 automated recommendations (pricing, promotion timing, inventory advice)
+
+- Persistence: SQLite for demo (or Postgres for production). Store jobs, forecasts, and metadata.
+
+
+
+4) Frontend:
+
+- React + Vite or CRA.
+
+- Pages/components:
+
+  - Upload & preview (file drop, sample CSV)
+
+  - Config modal (aggregation, horizon, model, target)
+
+  - Dashboard: interactive charts (use Chart.js or Recharts) for historical vs forecast with CI, decomposition panels, table of top products/regions
+
+  - InsightsCard: titled bullets + download CTA
+
+  - Settings: API key / auth
+
+- UX: friendly copy, loading states, chart tooltips, download buttons.
+
+
+
+5) Devops & testing:
+
+- Dockerfile for backend and frontend plus docker-compose for local dev (db + services).
+
+- CI: basic pytest unit tests for backend functions and a simple frontend test (Jest).
+
+- README with local dev commands, Replit deployment notes, env vars (e.g., SECRET_KEY, DATABASE_URL), and model selection guidance.
+
+
+
+6) Sample data and demo mode:
+
+- Create a script generate_demo_data.py that makes 2 years of daily sales for 50 SKUs across 4 regions with promotions and price changes. Provide a sample CSV.
+
+
+
+7) Acceptance criteria (what to deliver now):
+
+- Working FastAPI backend with implemented endpoints and model pipeline (Prophet & LightGBM).
+
+- React frontend that lets me upload CSV, run forecast, view charts, and view insights.
+
+- Sample CSV and README with instructions to run locally via Docker compose.
+
+- Minimal authentication (optional: token-based).
+
+
+
+
+
+Please scaffold full code for backend and frontend files with clear inline comments, include the sample CSV generator, unit tests for major backend functions, and a README that shows how to run the app locally and how to deploy to Replit or Docker. Keep code style clean and modular.
+

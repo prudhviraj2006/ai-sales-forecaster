@@ -1,0 +1,67 @@
+modules = ["python-3.11", "nodejs-20"]
+[nix]
+channel = "stable-25_05"
+packages = ["unzip", "gcc", "gfortran"]
+
+[agent]
+expertMode = true
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Backend API"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Frontend Web"
+
+[[workflows.workflow]]
+name = "Backend API"
+author = "agent"
+
+[workflows.workflow.metadata]
+outputType = "console"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd AISalesForecasterzip/AISalesForecaster && python -m uvicorn backend.app.main:app --host 0.0.0.0 --port 8000 --reload"
+waitForPort = 8000
+
+[[workflows.workflow]]
+name = "Frontend Web"
+author = "agent"
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd AISalesForecasterzip/AISalesForecaster/frontend && npm install -q && npm run dev"
+waitForPort = 5000
+
+[[ports]]
+localPort = 5000
+externalPort = 80
+
+[[ports]]
+localPort = 5001
+externalPort = 3001
+
+[[ports]]
+localPort = 5002
+externalPort = 3002
+
+[[ports]]
+localPort = 5003
+externalPort = 3003
+
+[[ports]]
+localPort = 8000
+externalPort = 8000

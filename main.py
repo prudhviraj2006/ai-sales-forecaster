@@ -1,6 +1,8 @@
-def main():
-    print("Hello from repl-nix-workspace!")
+from fastapi import FastAPI
 
+app = FastAPI()
 
-if __name__ == "__main__":
-    main()
+@app.get("/")
+def root():
+    return {"status": "Backend running on Render"}
+

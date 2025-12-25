@@ -3,6 +3,11 @@
     {
       "source": "/api/(.*)",
       "destination": "https://ai-sales-forecaster.onrender.com/$1"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
+

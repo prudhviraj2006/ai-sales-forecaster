@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "https://ai-sales-forecaster.onrender.com/$1"
+    }
+  ]
+}

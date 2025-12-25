@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+pandas
+numpy
+scikit-learn
+matplotlib
+seaborn
+prophet
+statsmodels
+google-generativeai
+python-dotenv

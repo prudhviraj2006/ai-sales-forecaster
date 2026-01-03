@@ -8,15 +8,24 @@ function ChatBot({ jobId, darkMode }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showScrollToBottom, setShowScrollToBottom] = useState(false);
   const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
   };
 
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  const handleScroll = (e) => {
+    const { scrollTop, scrollHeight, clientHeight } = e.target;
+    const isAtBottom = scrollTop + clientHeight >= scrollHeight - 50;
+    
+    setShowScrollToBottom(!isAtBottom && messages.length > 2);
+  };
 
   const suggestedQuestions = [
     'Show next 6-month forecast',
@@ -99,7 +108,14 @@ function ChatBot({ jobId, darkMode }) {
       {!isMinimized && (
         <>
           {/* Messages Area */}
-          <div className={`flex-1 overflow-y-auto p-4 space-y-4 ${darkMode ? 'bg-slate-900' : 'bg-gray-50'}`}>
+          <div 
+            ref={messagesContainerRef}
+            className={`flex-1 overflow-y-auto p-4 space-y-4 scroll-smooth relative ${
+              darkMode ? 'bg-slate-900 scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-slate-800' : 'bg-gray-50 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100'
+            }`} 
+            style={{ maxHeight: 'calc(100% - 140px)' }}
+            onScroll={handleScroll}
+          >
             {messages.length === 0 ? (
               <div className={`text-center py-8 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                 <p className="mb-4 font-semibold">How can I help?</p>
@@ -153,6 +169,33 @@ function ChatBot({ jobId, darkMode }) {
               </div>
             )}
             <div ref={messagesEndRef} />
+            
+            {/* Scroll to Bottom Button */}
+            {showScrollToBottom && (
+              <button
+                onClick={scrollToBottom}
+                className={`absolute bottom-4 right-4 p-2 rounded-full shadow-lg transition-all hover:scale-110 ${
+                  darkMode
+                    ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                    : 'bg-blue-500 hover:bg-blue-600 text-white'
+                }`}
+                title="Scroll to bottom"
+              >
+                <svg 
+                  className="w-4 h-4" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    strokeWidth={2} 
+                    d="M19 14l-7 7m0 0l-7-7m7 7V3" 
+                  />
+                </svg>
+              </button>
+            )}
           </div>
 
           {/* Input Area */}

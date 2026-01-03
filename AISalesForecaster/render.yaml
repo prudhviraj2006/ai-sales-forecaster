@@ -1,15 +1,11 @@
-{
-  "version": 2,
-  "builds": [
-    {
-      "src": "requirements.txt",
-      "use": "@vercel/python"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/backend/app/main.py"
-    }
-  ]
-}
+services:
+  - type: web
+    name: ai-sales-forecaster
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn backend.app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: OPENROUTER_API_KEY
+        value: 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
+      - key: PYTHONPATH
+        value: /opt/render/project/src

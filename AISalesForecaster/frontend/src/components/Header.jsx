@@ -11,7 +11,7 @@ function Header({ currentStep, darkMode, onToggleDarkMode }) {
   const currentIndex = steps.findIndex(s => s.id === currentStep);
 
   return (
-    <header className="gradient-bg text-white shadow-lg ml-64">
+    <header className="gradient-bg text-white shadow-lg md:ml-64">
       <div className="max-w-7xl mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -19,8 +19,8 @@ function Header({ currentStep, darkMode, onToggleDarkMode }) {
               <BarChart3 size={28} />
             </div>
             <div>
-              <h1 className="text-xl font-bold">AI Sales Forecaster</h1>
-              <p className="text-sm text-blue-100">Business Insight Generator</p>
+              <h1 className="text-lg md:text-xl font-bold">AI Sales Forecaster</h1>
+              <p className="text-xs md:text-sm text-blue-100">Business Insight Generator</p>
             </div>
           </div>
           
